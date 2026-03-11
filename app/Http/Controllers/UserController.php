@@ -55,7 +55,16 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
-        $dto         = UpdateUserDto::fromRequest($request);
+        $dto = UpdateUserDto::fromRequest($request);
+
+        if (empty($dto->toArray())) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Nenhuma alteração foi realizada.',
+                'data'    => new UserResource($user),
+            ], 201);
+        }
+
         $updatedUser = $this->userService->update($user, $dto);
 
         return response()->json([
