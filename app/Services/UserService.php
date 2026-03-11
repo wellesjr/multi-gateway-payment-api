@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\User;
 use App\Dtos\CreateUserDto;
 use App\Dtos\UpdateUserDto;
-use App\Models\User;
-use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
+
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class UserService
