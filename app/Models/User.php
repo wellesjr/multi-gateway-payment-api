@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,18 +11,6 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
-
-    const ROLE_ADMIN   = 'ADMIN';
-    const ROLE_MANAGER = 'MANAGER';
-    const ROLE_FINANCE = 'FINANCE';
-    const ROLE_USER    = 'USER';
-
-    const ROLES = [
-        self::ROLE_ADMIN,
-        self::ROLE_MANAGER,
-        self::ROLE_FINANCE,
-        self::ROLE_USER,
-    ];
 
     protected $fillable = [
         'name',
@@ -45,20 +34,21 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
+            'role'              => UserRole::class,
         ];
     }
 
     public function isAdmin(): bool
     {
-        return $this->role === self::ROLE_ADMIN;
+        return $this->role === UserRole::Admin;
     }
 
     public function isManager(): bool
     {
-        return $this->role === self::ROLE_MANAGER;
+        return $this->role === UserRole::Manager;
     }
 
-    public function hasRole(string ...$roles): bool
+    public function hasRole(UserRole ...$roles): bool
     {
         return in_array($this->role, $roles, true);
     }

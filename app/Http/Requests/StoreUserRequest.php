@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\User;
+use App\Enums\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -18,20 +18,21 @@ class StoreUserRequest extends FormRequest
             return false;
         }
 
-        return in_array($user->role, [User::ROLE_ADMIN, User::ROLE_MANAGER], true);
+        return in_array($user->role, [UserRole::Admin, UserRole::Manager], true);
     }
 
     public function rules(): array
     {
+        $roleValues = array_column(UserRole::cases(), 'value');
+
         $rules = [
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role'     => ['sometimes', Rule::in(User::ROLES)],
+            'role'     => ['sometimes', Rule::in($roleValues)],
         ];
 
-        // MANAGER não pode criar ADMIN
-        if ($this->user()->role === User::ROLE_MANAGER) {
+        if ($this->user()->role === UserRole::Manager) {
             $rules['role'][] = 'not_in:ADMIN';
         }
 
