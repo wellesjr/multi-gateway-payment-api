@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Dtos\CreateUserDto;
-use App\Dtos\UpdateUserDto;
+use App\Dtos\User\CreateUserDto;
+use App\Dtos\User\UpdateUserDto;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;

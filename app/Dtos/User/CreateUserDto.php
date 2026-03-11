@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Dtos;
+namespace App\Dtos\User;
 
 use App\Enums\UserRole;
-use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\User\StoreUserRequest;
 
 readonly class CreateUserDto
 {

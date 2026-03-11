@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\ForceJsonResponse;
 
 use Illuminate\Foundation\Application;
@@ -19,14 +20,14 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'role' => RoleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->renderable(function (NotFoundHttpException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Recurso não encontrado.',
+                'message' => 'Usuário não encontrado.',
             ], 404);
         });
     })->create();

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Dtos;
+namespace App\Dtos\User;
 
 use App\Enums\UserRole;
-use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 
 readonly class UpdateUserDto
 {

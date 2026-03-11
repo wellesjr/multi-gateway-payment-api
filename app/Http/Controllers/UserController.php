@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Dtos\CreateUserDto;
-use App\Dtos\UpdateUserDto;
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
+use App\Dtos\User\CreateUserDto;
+use App\Dtos\User\UpdateUserDto;
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\UserService;
@@ -23,13 +23,7 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => UserResource::collection($users),
-            'meta'    => [
-                'current_page' => $users->currentPage(),
-                'last_page'    => $users->lastPage(),
-                'per_page'     => $users->perPage(),
-                'total'        => $users->total(),
-            ],
+            'data'    => $users->through(fn ($user) => (new UserResource($user))->toArrayListing(request())),
         ]);
     }
 
