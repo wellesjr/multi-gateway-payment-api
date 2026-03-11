@@ -27,7 +27,7 @@ class StoreUserRequest extends FormRequest
 
         $rules = [
             'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'email', 'unique:users,email'],
+            'email'    => ['required', 'email:rfc,dns', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role'     => ['sometimes', Rule::in($roleValues)],
         ];

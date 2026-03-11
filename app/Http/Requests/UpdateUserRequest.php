@@ -38,7 +38,7 @@ class UpdateUserRequest extends FormRequest
 
         $rules = [
             'name'     => ['sometimes', 'string', 'max:255'],
-            'email'    => ['sometimes', 'email', "unique:users,email,{$userId}"],
+            'email'    => ['sometimes', 'email:rfc,dns', "unique:users,email,{$userId}"],
             'password' => ['sometimes', 'string', 'min:8', 'confirmed'],
             'role'     => ['sometimes', Rule::in($roleValues)],
         ];
