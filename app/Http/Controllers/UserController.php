@@ -8,13 +8,18 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
 {
+    public function __construct(
+        private readonly UserService $userService,
+    ) {}
+
     public function index(): JsonResponse
     {
-        $users = User::paginate(15);
+        $users = $this->userService->list();
 
         return response()->json([
             'success' => true,
@@ -31,7 +36,7 @@ class UserController extends Controller
     public function store(StoreUserRequest $request): JsonResponse
     {
         $dto  = CreateUserDto::fromRequest($request);
-        $user = User::create($dto->toArray());
+        $user = $this->userService->create($dto);
 
         return response()->json([
             'success' => true,
@@ -50,29 +55,26 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
-        $dto = UpdateUserDto::fromRequest($request);
-        $user->update($dto->toArray());
+        $dto         = UpdateUserDto::fromRequest($request);
+        $updatedUser = $this->userService->update($user, $dto);
 
         return response()->json([
             'success' => true,
             'message' => 'Usuário atualizado com sucesso.',
-            'data'    => new UserResource($user->fresh()),
+            'data'    => new UserResource($updatedUser),
         ]);
     }
 
     public function destroy(User $user): JsonResponse
     {
-        $authUser = request()->user();
-
-        if ($authUser->id === $user->id) {
+        try {
+            $this->userService->delete($user, request()->user());
+        } catch (\DomainException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Você não pode excluir sua própria conta.',
+                'message' => $e->getMessage(),
             ], 403);
         }
-
-        $user->tokens()->delete();
-        $user->delete();
 
         return response()->json([
             'success' => true,

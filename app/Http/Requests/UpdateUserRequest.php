@@ -3,8 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Enums\UserRole;
-use Illuminate\Foundation\Http\FormRequest;
+
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
@@ -19,17 +20,14 @@ class UpdateUserRequest extends FormRequest
             return false;
         }
 
-        // ADMIN pode editar qualquer um
         if ($authUser->role === UserRole::Admin) {
             return true;
         }
 
-        // MANAGER pode editar qualquer um exceto ADMIN
         if ($authUser->role === UserRole::Manager) {
             return $targetUser->role !== UserRole::Admin;
         }
 
-        // Demais roles só podem editar o próprio perfil
         return $authUser->id === $targetUser->id;
     }
 
@@ -47,12 +45,10 @@ class UpdateUserRequest extends FormRequest
 
         $authRole = $this->user()->role;
 
-        // MANAGER não pode atribuir role ADMIN
         if ($authRole === UserRole::Manager) {
             $rules['role'][] = 'not_in:ADMIN';
         }
 
-        // FINANCE e USER não podem alterar role
         if (in_array($authRole, [UserRole::Finance, UserRole::User], true)) {
             $rules['role'] = ['prohibited'];
         }
