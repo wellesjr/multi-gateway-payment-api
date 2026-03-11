@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    'gateway1' => [
+        'url'   => env('GATEWAY1_URL' ),
+        'email' => env('GATEWAY1_EMAIL'),
+        'token' => env('GATEWAY1_TOKEN'),
+    ],
+
+    'gateway2' => [
+        'url'         => env('GATEWAY2_URL'),
+        'auth_token'  => env('GATEWAY2_AUTH_TOKEN'),
+        'auth_secret' => env('GATEWAY2_AUTH_SECRET'),
+    ],
+
 ];
