@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\User;
+use App\Enums\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -20,13 +20,13 @@ class UpdateUserRequest extends FormRequest
         }
 
         // ADMIN pode editar qualquer um
-        if ($authUser->role === User::ROLE_ADMIN) {
+        if ($authUser->role === UserRole::Admin) {
             return true;
         }
 
         // MANAGER pode editar qualquer um exceto ADMIN
-        if ($authUser->role === User::ROLE_MANAGER) {
-            return $targetUser->role !== User::ROLE_ADMIN;
+        if ($authUser->role === UserRole::Manager) {
+            return $targetUser->role !== UserRole::Admin;
         }
 
         // Demais roles só podem editar o próprio perfil
@@ -35,24 +35,25 @@ class UpdateUserRequest extends FormRequest
 
     public function rules(): array
     {
-        $userId = $this->route('user')->id;
+        $userId     = $this->route('user')->id;
+        $roleValues = array_column(UserRole::cases(), 'value');
 
         $rules = [
             'name'     => ['sometimes', 'string', 'max:255'],
             'email'    => ['sometimes', 'email', "unique:users,email,{$userId}"],
             'password' => ['sometimes', 'string', 'min:8', 'confirmed'],
-            'role'     => ['sometimes', Rule::in(User::ROLES)],
+            'role'     => ['sometimes', Rule::in($roleValues)],
         ];
 
         $authRole = $this->user()->role;
 
         // MANAGER não pode atribuir role ADMIN
-        if ($authRole === User::ROLE_MANAGER) {
+        if ($authRole === UserRole::Manager) {
             $rules['role'][] = 'not_in:ADMIN';
         }
 
         // FINANCE e USER não podem alterar role
-        if (in_array($authRole, [User::ROLE_FINANCE, User::ROLE_USER], true)) {
+        if (in_array($authRole, [UserRole::Finance, UserRole::User], true)) {
             $rules['role'] = ['prohibited'];
         }
 

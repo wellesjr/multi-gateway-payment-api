@@ -2,15 +2,16 @@
 
 namespace App\Dtos;
 
+use App\Enums\UserRole;
 use App\Http\Requests\UpdateUserRequest;
 
 readonly class UpdateUserDto
 {
     public function __construct(
-        public ?string $name     = null,
-        public ?string $email    = null,
-        public ?string $password = null,
-        public ?string $role     = null,
+        public ?string   $name     = null,
+        public ?string   $email    = null,
+        public ?string   $password = null,
+        public ?UserRole $role     = null,
     ) {}
 
     public static function fromRequest(UpdateUserRequest $request): self
@@ -21,7 +22,7 @@ readonly class UpdateUserDto
             name:     $data['name']     ?? null,
             email:    $data['email']    ?? null,
             password: $data['password'] ?? null,
-            role:     $data['role']     ?? null,
+            role:     isset($data['role']) ? UserRole::from($data['role']) : null,
         );
     }
 
@@ -31,7 +32,7 @@ readonly class UpdateUserDto
             'name'     => $this->name,
             'email'    => $this->email,
             'password' => $this->password,
-            'role'     => $this->role,
+            'role'     => $this->role?->value,
         ], fn ($value) => $value !== null);
     }
 }
