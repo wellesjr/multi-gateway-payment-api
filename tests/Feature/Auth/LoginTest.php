@@ -8,13 +8,19 @@ use Illuminate\Support\Facades\Hash;
 uses(RefreshDatabase::class);
 
 test('login requerido email e senha', function () {
+
+    /** @var \Tests\TestCase $this */
+
     $response = $this->postJson('/api/login', []);
 
     $response->assertStatus(422)
         ->assertJsonValidationErrors(['email', 'password']);
 });
 
-test('login requires valid email', function () {
+test('login falha com email inválido', function () {
+
+    /** @var \Tests\TestCase $this */
+
     $response = $this->postJson('/api/login', [
         'email' => 'email-invalido',
         'password' => '123456'
@@ -24,7 +30,10 @@ test('login requires valid email', function () {
         ->assertJsonValidationErrors(['email']);
 });
 
-test('login fails with invalid credentials', function () {
+test('login falha com credenciais inválidas', function () {
+
+    /** @var \Tests\TestCase $this */
+
     $response = $this->postJson('/api/login', [
         'email' => 'fake@email.com',
         'password' => '123456'
@@ -36,7 +45,9 @@ test('login fails with invalid credentials', function () {
         ]);
 });
 
-test('login fails with wrong password', function () {
+test('login falha com senha incorreta', function () {
+
+    /** @var \Tests\TestCase $this */
 
     $user = User::factory()->create([
         'password' => Hash::make('123456')
@@ -53,7 +64,9 @@ test('login fails with wrong password', function () {
         ]);
 });
 
-test('login fails when user does not exist', function () {
+test('login falha quando usuário não existe', function () {
+
+    /** @var \Tests\TestCase $this */
 
     $response = $this->postJson('/api/login', [
         'email' => 'naoexiste@email.com',
@@ -66,7 +79,9 @@ test('login fails when user does not exist', function () {
         ]);
 });
 
-test('user can login and receive token', function () {
+test('login com credenciais válidas', function () {
+
+    /** @var \Tests\TestCase $this */
 
     $user = User::factory()->create([
         'password' => Hash::make('123456')
@@ -85,7 +100,9 @@ test('user can login and receive token', function () {
         ]);
 });
 
-test('login rate limit', function () {
+test('login com limite de tentativas atingido', function () {
+
+    /** @var \Tests\TestCase $this */
 
     for ($i = 0; $i < 6; $i++) {
         $response = $this->postJson('/api/login', [
