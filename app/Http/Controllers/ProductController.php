@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Services\ProductService;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 class ProductController extends Controller
 {
@@ -43,7 +44,7 @@ class ProductController extends Controller
             'success' => true,
             'message' => 'Produto criado com sucesso.',
             'data'    => new ProductResource($product),
-        ]);
+        ], 201);
     }
 
     public function show(Product $product): JsonResponse
@@ -54,16 +55,12 @@ class ProductController extends Controller
         ]);
     }
 
-    public function update(UpdateProductRequest $request, Product $product): JsonResponse
+    public function update(UpdateProductRequest $request, Product $product): JsonResponse|Response
     {
         $dto = UpdateProductDto::fromRequest($request);
 
         if (empty($dto->toArray())) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Nenhuma alteração foi realizada.',
-                'data'    => new ProductResource($product),
-            ], 204);
+            return response()->noContent();
         }
 
         $updatedProduct = $this->productService->update($product, $dto);
