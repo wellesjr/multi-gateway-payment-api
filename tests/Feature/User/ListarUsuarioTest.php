@@ -10,43 +10,43 @@ test('listar usuários requer autenticação', function () {
 
     /** @var \Tests\TestCase $this */
 
-    $this->getJson('/api/users')->assertStatus(401);
+    $this->getJson('/api/v1/users')->assertStatus(401);
 });
 
 test('usuário com role USER não pode listar usuários', function () {
 
-/** @var \Tests\TestCase $this 
+    /** @var \Tests\TestCase $this 
      * @var User $user
-    */
+     */
     $user = User::factory()->create(['role' => UserRole::User]);
 
     $this->actingAs($user)
-        ->getJson('/api/users')
+        ->getJson('/api/v1/users')
         ->assertStatus(403);
 });
 
 test('usuário com role FINANCE não pode listar usuários', function () {
-    
-/** @var \Tests\TestCase $this 
+
+    /** @var \Tests\TestCase $this 
      * @var User $user
-    */
+     */
 
     $user = User::factory()->create(['role' => UserRole::Finance]);
 
     $this->actingAs($user)
-        ->getJson('/api/users')
+        ->getJson('/api/v1/users')
         ->assertStatus(403);
 });
 
 test('ADMIN pode listar usuários', function () {
     /** @var \Tests\TestCase $this 
      * @var User $admin
-    */
+     */
     $admin = User::factory()->create(['role' => UserRole::Admin]);
     User::factory()->count(5)->create();
 
     $response = $this->actingAs($admin)
-        ->getJson('/api/users');
+        ->getJson('/api/v1/users');
 
     $response->assertStatus(200)
         ->assertJsonStructure([
@@ -61,12 +61,12 @@ test('MANAGER pode listar usuários', function () {
 
     /** @var \Tests\TestCase $this 
      * @var User $manager
-    */
+     */
 
     $manager = User::factory()->create(['role' => UserRole::Manager]);
 
     $this->actingAs($manager)
-        ->getJson('/api/users')
+        ->getJson('/api/v1/users')
         ->assertStatus(200)
         ->assertJson(['success' => true]);
 });
@@ -75,13 +75,13 @@ test('listagem de usuários é paginada', function () {
 
     /** @var \Tests\TestCase $this 
      * @var User $admin
-    */
+     */
 
     $admin = User::factory()->create(['role' => UserRole::Admin]);
     User::factory()->count(20)->create();
 
     $response = $this->actingAs($admin)
-        ->getJson('/api/users');
+        ->getJson('/api/v1/users');
 
     $response->assertStatus(200);
     $meta = $response->json('meta');
@@ -90,39 +90,39 @@ test('listagem de usuários é paginada', function () {
 });
 
 test('visualizar usuário requer autenticação', function () {
-    
+
     /** @var \Tests\TestCase $this */
 
     $user = User::factory()->create();
 
-    $this->getJson("/api/users/{$user->id}")->assertStatus(401);
+    $this->getJson("/api/v1/users/{$user->id}")->assertStatus(401);
 });
 
 test('usuário com role USER não pode visualizar outro usuário', function () {
-    
+
     /** @var \Tests\TestCase $this 
      * @var User $user
-    */
+     */
 
     $user   = User::factory()->create(['role' => UserRole::User]);
     $target = User::factory()->create();
 
     $this->actingAs($user)
-        ->getJson("/api/users/{$target->id}")
+        ->getJson("/api/v1/users/{$target->id}")
         ->assertStatus(403);
 });
 
 test('ADMIN pode visualizar qualquer usuário', function () {
-    
+
     /** @var \Tests\TestCase $this 
      * @var User $admin
-    */
+     */
 
     $admin  = User::factory()->create(['role' => UserRole::Admin]);
     $target = User::factory()->create(['role' => UserRole::User]);
 
     $response = $this->actingAs($admin)
-        ->getJson("/api/users/{$target->id}");
+        ->getJson("/api/v1/users/{$target->id}");
 
     $response->assertStatus(200)
         ->assertJsonStructure([
@@ -140,21 +140,21 @@ test('ADMIN pode visualizar qualquer usuário', function () {
 });
 
 test('MANAGER pode visualizar qualquer usuário', function () {
-    
+
     /** @var \Tests\TestCase $this 
      * @var User $manager
-    */
+     */
 
     $manager = User::factory()->create(['role' => UserRole::Manager]);
     $target  = User::factory()->create();
 
     $this->actingAs($manager)
-        ->getJson("/api/users/{$target->id}")
+        ->getJson("/api/v1/users/{$target->id}")
         ->assertStatus(200);
 });
 
 test('FINANCE pode visualizar qualquer usuário', function () {
-    
+
     /** @var \Tests\TestCase $this
      * @var User $finance
      */
@@ -163,19 +163,19 @@ test('FINANCE pode visualizar qualquer usuário', function () {
     $target  = User::factory()->create();
 
     $this->actingAs($finance)
-        ->getJson("/api/users/{$target->id}")
+        ->getJson("/api/v1/users/{$target->id}")
         ->assertStatus(200);
 });
 
 test('retorna 404 para usuário inexistente', function () {
-    
+
     /** @var \Tests\TestCase $this 
      * @var User $admin
-    */
+     */
 
     $admin = User::factory()->create(['role' => UserRole::Admin]);
 
     $this->actingAs($admin)
-        ->getJson('/api/users/99999')
+        ->getJson('/api/v1/users/99999')
         ->assertStatus(404);
 });

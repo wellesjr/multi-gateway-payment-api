@@ -42,7 +42,7 @@ class UserController extends Controller
             'success' => true,
             'message' => 'Usuário criado com sucesso.',
             'data' => new UserResource($user),
-        ], 201);
+        ]);
     }
 
     public function show(User $user): JsonResponse
@@ -67,7 +67,7 @@ class UserController extends Controller
                 'success' => true,
                 'message' => 'Nenhuma alteração foi realizada.',
                 'data' => $resource->toArrayUpdate(request()),
-            ], 201);
+            ], 204);
         }
 
         $updatedUser = $this->userService->update($user, $dto);

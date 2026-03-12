@@ -10,7 +10,7 @@ uses(RefreshDatabase::class);
 test('criar usuário requer autenticação', function () {
 
     /** @var TestCase $this */
-    $this->postJson('/api/users', [])->assertStatus(401);
+    $this->postJson('/api/v1/users', [])->assertStatus(401);
 });
 
 test('usuário com role USER não pode criar usuários', function () {
@@ -21,7 +21,7 @@ test('usuário com role USER não pode criar usuários', function () {
     $user = User::factory()->create(['role' => UserRole::User]);
 
     $this->actingAs($user)
-        ->postJson('/api/users', [
+        ->postJson('/api/v1/users', [
             'name' => 'Novo User',
             'email' => 'novo@email.com',
             'password' => 'senha12345',
@@ -38,7 +38,7 @@ test('usuário com role FINANCE não pode criar usuários', function () {
     $user = User::factory()->create(['role' => UserRole::Finance]);
 
     $this->actingAs($user)
-        ->postJson('/api/users', [
+        ->postJson('/api/v1/users', [
             'name' => 'Novo User',
             'email' => 'novo@email.com',
             'password' => 'senha12345',
@@ -55,7 +55,7 @@ test('ADMIN pode criar usuário com sucesso', function () {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
 
     $response = $this->actingAs($admin)
-        ->postJson('/api/users', [
+        ->postJson('/api/v1/users', [
             'name' => 'Novo Usuário',
             'email' => 'novo@email.com',
             'password' => 'senha12345',
@@ -83,7 +83,7 @@ test('MANAGER pode criar usuário com sucesso', function () {
     $manager = User::factory()->create(['role' => UserRole::Manager]);
 
     $response = $this->actingAs($manager)
-        ->postJson('/api/users', [
+        ->postJson('/api/v1/users', [
             'name' => 'Criado por Manager',
             'email' => 'manager-criou@email.com',
             'password' => 'senha12345',
@@ -102,7 +102,7 @@ test('ADMIN pode criar usuário com role ADMIN', function () {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
 
     $response = $this->actingAs($admin)
-        ->postJson('/api/users', [
+        ->postJson('/api/v1/users', [
             'name' => 'Novo Admin',
             'email' => 'admin2@email.com',
             'password' => 'senha12345',
@@ -125,7 +125,7 @@ test('MANAGER não pode criar usuário com role ADMIN', function () {
     $manager = User::factory()->create(['role' => UserRole::Manager]);
 
     $this->actingAs($manager)
-        ->postJson('/api/users', [
+        ->postJson('/api/v1/users', [
             'name' => 'Tentativa Admin',
             'email' => 'tentativa@email.com',
             'password' => 'senha12345',
@@ -143,7 +143,7 @@ test('usuário criado sem role recebe role USER por padrão', function () {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
 
     $this->actingAs($admin)
-        ->postJson('/api/users', [
+        ->postJson('/api/v1/users', [
             'name' => 'Sem Role',
             'email' => 'semrole@email.com',
             'password' => 'senha12345',
@@ -164,7 +164,7 @@ test('criar usuário falha sem campos obrigatórios', function () {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
 
     $this->actingAs($admin)
-        ->postJson('/api/users', [])
+        ->postJson('/api/v1/users', [])
         ->assertStatus(422)
         ->assertJsonValidationErrors(['name', 'email', 'password']);
 });
@@ -178,7 +178,7 @@ test('criar usuário falha com email duplicado', function () {
     $existing = User::factory()->create();
 
     $this->actingAs($admin)
-        ->postJson('/api/users', [
+        ->postJson('/api/v1/users', [
             'name' => 'Duplicado',
             'email' => $existing->email,
             'password' => 'senha12345',
@@ -196,7 +196,7 @@ test('criar usuário falha com senha curta', function () {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
 
     $this->actingAs($admin)
-        ->postJson('/api/users', [
+        ->postJson('/api/v1/users', [
             'name' => 'Senha Curta',
             'email' => 'curta@email.com',
             'password' => '123',
@@ -214,7 +214,7 @@ test('criar usuário falha sem confirmação de senha', function () {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
 
     $this->actingAs($admin)
-        ->postJson('/api/users', [
+        ->postJson('/api/v1/users', [
             'name' => 'Sem Confirmação',
             'email' => 'semconfirmacao@email.com',
             'password' => 'senha12345',
@@ -231,7 +231,7 @@ test('criar usuário falha com role inválido', function () {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
 
     $this->actingAs($admin)
-        ->postJson('/api/users', [
+        ->postJson('/api/v1/users', [
             'name' => 'Role Inválido',
             'email' => 'invalido@email.com',
             'password' => 'senha12345',

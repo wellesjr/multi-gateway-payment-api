@@ -13,7 +13,7 @@ test('excluir produto requer autenticação', function () {
     /** @var TestCase $this */
     $product = Product::factory()->create();
 
-    $this->deleteJson("/api/products/{$product->id}")->assertStatus(401);
+    $this->deleteJson("/api/v1/products/{$product->id}")->assertStatus(401);
 });
 
 test('usuário com role USER não pode excluir produtos', function () {
@@ -25,7 +25,7 @@ test('usuário com role USER não pode excluir produtos', function () {
     $product = Product::factory()->create();
 
     $this->actingAs($user)
-        ->deleteJson("/api/products/{$product->id}")
+        ->deleteJson("/api/v1/products/{$product->id}")
         ->assertStatus(403);
 });
 
@@ -38,7 +38,7 @@ test('usuário com role MANAGER não pode excluir produtos', function () {
     $product = Product::factory()->create();
 
     $this->actingAs($manager)
-        ->deleteJson("/api/products/{$product->id}")
+        ->deleteJson("/api/v1/products/{$product->id}")
         ->assertStatus(403);
 });
 
@@ -51,7 +51,7 @@ test('usuário com role FINANCE não pode excluir produtos', function () {
     $product = Product::factory()->create();
 
     $this->actingAs($finance)
-        ->deleteJson("/api/products/{$product->id}")
+        ->deleteJson("/api/v1/products/{$product->id}")
         ->assertStatus(403);
 });
 
@@ -64,7 +64,7 @@ test('ADMIN pode excluir produto', function () {
     $product = Product::factory()->create();
 
     $response = $this->actingAs($admin)
-        ->deleteJson("/api/products/{$product->id}");
+        ->deleteJson("/api/v1/products/{$product->id}");
 
     $response->assertStatus(200)
         ->assertJson([
@@ -83,6 +83,6 @@ test('excluir produto inexistente retorna 404', function () {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
 
     $this->actingAs($admin)
-        ->deleteJson('/api/products/99999')
+        ->deleteJson('/api/v1/products/99999')
         ->assertStatus(404);
 });

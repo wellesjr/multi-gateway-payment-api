@@ -43,7 +43,7 @@ class ProductController extends Controller
             'success' => true,
             'message' => 'Produto criado com sucesso.',
             'data'    => new ProductResource($product),
-        ], 201);
+        ]);
     }
 
     public function show(Product $product): JsonResponse
@@ -63,7 +63,7 @@ class ProductController extends Controller
                 'success' => true,
                 'message' => 'Nenhuma alteração foi realizada.',
                 'data'    => new ProductResource($product),
-            ], 201);
+            ], 204);
         }
 
         $updatedProduct = $this->productService->update($product, $dto);
