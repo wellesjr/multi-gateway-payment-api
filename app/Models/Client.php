@@ -13,5 +13,4 @@ class Client extends Model
         'name',
         'email'
     ];
-
 }

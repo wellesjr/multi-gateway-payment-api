@@ -24,6 +24,6 @@ class ClientRepository implements ClientRepositoryInterface
 
     public function findById(int $id): ?Client
     {
-        return Client::with('transactions')->find($id);
+        return Client::find($id);
     }
 }
