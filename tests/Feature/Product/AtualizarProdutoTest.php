@@ -128,11 +128,7 @@ test('atualizar produto sem dados retorna nenhuma alteração', function () {
 
     $this->actingAs($admin)
         ->putJson("/api/v1/products/{$product->id}", [])
-        ->assertStatus(204)
-        ->assertJson([
-            'success' => true,
-            'message' => 'Nenhuma alteração foi realizada.',
-        ]);
+        ->assertStatus(204);
 });
 
 test('atualizar produto falha com nome maior que 255 caracteres', function () {

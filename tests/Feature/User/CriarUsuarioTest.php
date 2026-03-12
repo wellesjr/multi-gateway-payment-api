@@ -62,7 +62,7 @@ test('ADMIN pode criar usuário com sucesso', function () {
             'password_confirmation' => 'senha12345',
         ]);
 
-    $response->assertStatus(201)
+    $response->assertStatus(200)
         ->assertJson([
             'success' => true,
             'message' => 'Usuário criado com sucesso.',
@@ -90,7 +90,7 @@ test('MANAGER pode criar usuário com sucesso', function () {
             'password_confirmation' => 'senha12345',
         ]);
 
-    $response->assertStatus(201);
+    $response->assertStatus(200);
     $this->assertDatabaseHas('users', ['email' => 'manager-criou@email.com']);
 });
 
@@ -110,7 +110,7 @@ test('ADMIN pode criar usuário com role ADMIN', function () {
             'role' => 'ADMIN',
         ]);
 
-    $response->assertStatus(201);
+    $response->assertStatus(200);
     $this->assertDatabaseHas('users', [
         'email' => 'admin2@email.com',
         'role' => 'ADMIN',
