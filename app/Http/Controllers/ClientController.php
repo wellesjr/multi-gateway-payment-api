@@ -2,47 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Clients;
+use App\Services\ClientService;
+use App\Http\Resources\ClientResource;
 
 class ClientController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct(
+        private ClientService $clientService
+    ) {}
+
     public function index()
     {
-        //
+        $clients = $this->clientService->list();
+
+        return response()->json([
+            'success' => true,
+            'data' => ClientResource::collection($clients),
+            'meta' => [
+                'current_page' => $clients->currentPage(),
+                'last_page' => $clients->lastPage(),
+                'per_page' => $clients->perPage(),
+                'total' => $clients->total(),
+            ],
+        ]);
+
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function show(int $id)
     {
-        //
-    }
+        $client = $this->clientService->find($id);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Clients $clients)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Clients $clients)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Clients $clients)
-    {
-        //
+        return new ClientResource($client);
     }
 }

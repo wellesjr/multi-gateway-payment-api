@@ -10,4 +10,5 @@ Route::post('/comprar', function () {
 });
 
 require __DIR__.'/api/v1/user.php';
+require __DIR__.'/api/v1/clients.php';
 require __DIR__.'/api/v1/products.php';
