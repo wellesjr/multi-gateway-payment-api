@@ -23,27 +23,35 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $users->through(fn ($user) => (new UserResource($user))->toArrayListing(request())),
+            'data' => UserResource::collection($users),
+            'meta' => [
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+                'per_page' => $users->perPage(),
+                'total' => $users->total(),
+            ],
         ]);
     }
 
     public function store(StoreUserRequest $request): JsonResponse
     {
-        $dto  = CreateUserDto::fromRequest($request);
+        $dto = CreateUserDto::fromRequest($request);
         $user = $this->userService->create($dto);
 
         return response()->json([
             'success' => true,
             'message' => 'Usuário criado com sucesso.',
-            'data'    => new UserResource($user),
+            'data' => new UserResource($user),
         ], 201);
     }
 
     public function show(User $user): JsonResponse
     {
+        $resource = new UserResource($user);
+
         return response()->json([
             'success' => true,
-            'data'    => new UserResource($user),
+            'data' => $resource->toArrayShow(request()),
         ]);
     }
 
@@ -52,19 +60,23 @@ class UserController extends Controller
         $dto = UpdateUserDto::fromRequest($request);
 
         if (empty($dto->toArray())) {
+
+            $resource = new UserResource($user);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Nenhuma alteração foi realizada.',
-                'data'    => new UserResource($user),
+                'data' => $resource->toArrayUpdate(request()),
             ], 201);
         }
 
         $updatedUser = $this->userService->update($user, $dto);
+        $resource = new UserResource($updatedUser);
 
         return response()->json([
             'success' => true,
             'message' => 'Usuário atualizado com sucesso.',
-            'data'    => new UserResource($updatedUser),
+            'data' => $resource->toArrayUpdate(request()),
         ]);
     }
 
