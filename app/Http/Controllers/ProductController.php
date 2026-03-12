@@ -44,7 +44,7 @@ class ProductController extends Controller
             'success' => true,
             'message' => 'Produto criado com sucesso.',
             'data'    => new ProductResource($product),
-        ]);
+        ], 201);
     }
 
     public function show(Product $product): JsonResponse

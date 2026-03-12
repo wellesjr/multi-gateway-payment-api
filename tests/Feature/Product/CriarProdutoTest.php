@@ -56,7 +56,7 @@ test('ADMIN pode criar produto com sucesso', function () {
             'amount' => 25.99,
         ]);
 
-    $response->assertStatus(200)
+    $response->assertStatus(201)
         ->assertJson([
             'success' => true,
             'message' => 'Produto criado com sucesso.',
@@ -85,7 +85,7 @@ test('MANAGER pode criar produto com sucesso', function () {
             'amount' => 50.00,
         ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(201);
     $this->assertDatabaseHas('products', ['name' => 'Produto do Manager']);
 });
 
@@ -189,7 +189,7 @@ test('criar produto aceita valor inteiro sem casas decimais', function () {
             'amount' => 10,
         ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(201);
     $this->assertDatabaseHas('products', ['name' => 'Produto Inteiro']);
 });
 
@@ -206,6 +206,6 @@ test('criar produto aceita valor com 1 casa decimal', function () {
             'amount' => 10.5,
         ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(201);
     $this->assertDatabaseHas('products', ['name' => 'Produto Decimal']);
 });

@@ -10,6 +10,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 class UserController extends Controller
 {
@@ -42,7 +43,7 @@ class UserController extends Controller
             'success' => true,
             'message' => 'Usuário criado com sucesso.',
             'data' => new UserResource($user),
-        ]);
+        ], 201);
     }
 
     public function show(User $user): JsonResponse
@@ -55,19 +56,12 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(UpdateUserRequest $request, User $user): JsonResponse
+    public function update(UpdateUserRequest $request, User $user): JsonResponse|Response
     {
         $dto = UpdateUserDto::fromRequest($request);
 
         if (empty($dto->toArray())) {
-
-            $resource = new UserResource($user);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Nenhuma alteração foi realizada.',
-                'data' => $resource->toArrayUpdate(request()),
-            ], 204);
+            return response()->noContent();
         }
 
         $updatedUser = $this->userService->update($user, $dto);
@@ -80,7 +74,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function destroy(User $user): JsonResponse
+    public function destroy(User $user): JsonResponse|Response
     {
         try {
             $this->userService->delete($user, request()->user());
