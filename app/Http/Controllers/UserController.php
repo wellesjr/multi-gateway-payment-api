@@ -9,6 +9,7 @@ use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\UserService;
+
 use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
@@ -23,7 +24,13 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $users->through(fn ($user) => (new UserResource($user))->toArrayListing(request())),
+            'data'    => UserResource::collection($users),
+            'meta'    => [
+                'current_page' => $users->currentPage(),
+                'last_page'    => $users->lastPage(),
+                'per_page'     => $users->perPage(),
+                'total'        => $users->total(),
+            ],
         ]);
     }
 
@@ -43,7 +50,7 @@ class UserController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data'    => new UserResource($user),
+            'data'    => new UserResource($user)->toArrayUpdate(request()),
         ]);
     }
 
@@ -55,7 +62,7 @@ class UserController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Nenhuma alteração foi realizada.',
-                'data'    => new UserResource($user),
+                'data'    => new UserResource($user)->toArrayUpdate(request()),
             ], 201);
         }
 
@@ -64,7 +71,7 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Usuário atualizado com sucesso.',
-            'data'    => new UserResource($updatedUser),
+            'data'    => new UserResource($updatedUser)->toArrayUpdate(request()),
         ]);
     }
 

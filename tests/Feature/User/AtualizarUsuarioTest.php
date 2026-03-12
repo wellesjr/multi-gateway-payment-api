@@ -168,11 +168,12 @@ test('atualizar email para um já existente falha', function () {
     });
 
 test('atualizar com role inválido falha', function () {
+    $admin  = User::factory()->create(['role' => UserRole::Admin]);
+    $target = User::factory()->create();
 
-    /** @var TestCase $this
+    /** @var TestCase $this 
      * @var User $admin
-     * @var User $target
-     */
+    */
     $this->actingAs($admin)
         ->putJson("/api/users/{$target->id}", ['role' => 'INEXISTENTE'])
         ->assertStatus(422)
