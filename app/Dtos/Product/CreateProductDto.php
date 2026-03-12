@@ -8,7 +8,7 @@ readonly class CreateProductDto
 {
     public function __construct(
         public string $name,
-        public int    $amount,
+        public float  $amount,
     ) {}
 
     public static function fromRequest(StoreProductRequest $request): self

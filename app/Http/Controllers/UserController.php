@@ -51,7 +51,7 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $resource->toArrayShow(request()),
+            'data' => $resource->toArray(request()),
         ]);
     }
 

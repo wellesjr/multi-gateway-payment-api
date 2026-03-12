@@ -8,7 +8,7 @@ readonly class UpdateProductDto
 {
     public function __construct(
         public ?string $name   = null,
-        public ?int    $amount = null,
+        public ?float  $amount = null,
     ) {}
 
     public static function fromRequest(UpdateProductRequest $request): self
