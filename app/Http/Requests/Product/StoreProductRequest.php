@@ -24,7 +24,7 @@ class StoreProductRequest extends FormRequest
     {
         return [
             'name'   => ['required', 'string', 'max:255'],
-            'amount' => ['required', 'integer', 'min:0'],
+            'amount' => ['required', 'decimal:2', 'min:0'],
         ];
     }
 
@@ -34,7 +34,7 @@ class StoreProductRequest extends FormRequest
             'name.required'   => 'O nome é obrigatório.',
             'name.max'        => 'O nome não pode ter mais de 255 caracteres.',
             'amount.required' => 'O valor é obrigatório.',
-            'amount.integer'  => 'O valor deve ser um número inteiro.',
+            'amount.decimal'  => 'O valor deve ser um número decimal com até 2 casas decimais.',
             'amount.min'      => 'O valor não pode ser negativo.',
         ];
     }
@@ -54,6 +54,7 @@ class StoreProductRequest extends FormRequest
     {
         throw new HttpResponseException(
             response()->json([
+                'success' => false,
                 'message' => 'Você não tem permissão para criar produtos.',
             ], 403)
         );

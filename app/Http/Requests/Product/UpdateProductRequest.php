@@ -24,7 +24,7 @@ class UpdateProductRequest extends FormRequest
     {
         return [
             'name'   => ['sometimes', 'string', 'max:255'],
-            'amount' => ['sometimes', 'integer', 'min:0'],
+            'amount' => ['sometimes', 'decimal:2', 'min:0'],
         ];
     }
 
@@ -32,7 +32,7 @@ class UpdateProductRequest extends FormRequest
     {
         return [
             'name.max'       => 'O nome não pode ter mais de 255 caracteres.',
-            'amount.integer' => 'O valor deve ser um número inteiro.',
+            'amount.decimal' => 'O valor deve ser um número decimal com até 2 casas decimais.',
             'amount.min'     => 'O valor não pode ser negativo.',
         ];
     }
@@ -52,6 +52,7 @@ class UpdateProductRequest extends FormRequest
     {
         throw new HttpResponseException(
             response()->json([
+                'success' => false,
                 'message' => 'Você não tem permissão para atualizar este produto.',
             ], 403)
         );
