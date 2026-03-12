@@ -119,18 +119,22 @@ test('ADMIN pode visualizar qualquer usuário', function () {
     */
 
     $admin  = User::factory()->create(['role' => UserRole::Admin]);
-    $target = User::factory()->create();
+    $target = User::factory()->create(['role' => UserRole::User]);
 
     $response = $this->actingAs($admin)
         ->getJson("/api/users/{$target->id}");
 
     $response->assertStatus(200)
+        ->assertJsonStructure([
+            'success',
+            'data' => ['name', 'email', 'role', 'email_verified_at', 'created_at'],
+        ])
         ->assertJson([
             'success' => true,
             'data'    => [
-                'id'    => $target->id,
                 'name'  => $target->name,
                 'email' => $target->email,
+                'role'  => $target->role->value,
             ],
         ]);
 });
