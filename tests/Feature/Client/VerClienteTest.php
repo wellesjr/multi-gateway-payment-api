@@ -42,6 +42,7 @@ test('ADMIN pode ver cliente', function () {
 
     $response->assertStatus(200)
         ->assertJson([
+            'success' => true,
             'data' => [
                 'id'    => $client->id,
                 'name'  => $client->name,
@@ -91,11 +92,28 @@ test('ver cliente retorna estrutura correta', function () {
         ->getJson("/api/v1/clients/{$client->id}");
 
     $response->assertStatus(200)
-        ->assertJsonStructure(['data' => ['id', 'name', 'email']])
+        ->assertJsonStructure(['success', 'data' => ['id', 'name', 'email']])
         ->assertJson([
+            'success' => true,
             'data' => [
                 'name'  => 'João Silva',
                 'email' => 'joao@example.com',
             ],
+        ]);
+});
+
+test('ver cliente inexistente retorna 404', function () {
+
+    /** @var TestCase $this
+     * @var User $admin
+     */
+    $admin = User::factory()->create(['role' => UserRole::Admin]);
+
+    $this->actingAs($admin)
+        ->getJson('/api/v1/clients/999999')
+        ->assertStatus(404)
+        ->assertJson([
+            'success' => false,
+            'message' => 'Cliente não encontrado.',
         ]);
 });

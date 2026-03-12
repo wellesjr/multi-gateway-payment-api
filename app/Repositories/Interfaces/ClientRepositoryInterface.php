@@ -3,6 +3,7 @@
 namespace App\Repositories\Interfaces;
 
 use App\Models\Client;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface ClientRepositoryInterface
 {
@@ -10,7 +11,7 @@ interface ClientRepositoryInterface
 
     public function create(array $data): Client;
 
-    public function paginate();
+    public function paginate(int $perPage = 15): LengthAwarePaginator;
 
     public function findById(int $id): ?Client;
 }

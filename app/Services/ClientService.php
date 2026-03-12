@@ -2,13 +2,14 @@
 
 namespace App\Services;
 
-use App\Repositories\Interfaces\ClientRepositoryInterface;
 use App\Models\Client;
+use App\Repositories\Interfaces\ClientRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ClientService
 {
     public function __construct(
-        private ClientRepositoryInterface $clientRepository
+        private readonly ClientRepositoryInterface $clientRepository
     ) {}
 
     public function findOrCreate(string $name, string $email): Client
@@ -20,17 +21,17 @@ class ClientService
         }
 
         return $this->clientRepository->create([
-            'name' => $name,
-            'email' => $email
+            'name'  => $name,
+            'email' => $email,
         ]);
     }
 
-    public function list()
+    public function list(int $perPage = 15): LengthAwarePaginator
     {
-        return $this->clientRepository->paginate();
+        return $this->clientRepository->paginate($perPage);
     }
 
-    public function find(int $id)
+    public function find(int $id): ?Client
     {
         return $this->clientRepository->findById($id);
     }

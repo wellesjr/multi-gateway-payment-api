@@ -25,13 +25,22 @@ class ClientController extends Controller
                 'total' => $clients->total(),
             ],
         ]);
-
     }
 
     public function show(int $id)
     {
         $client = $this->clientService->find($id);
 
-        return new ClientResource($client);
+        if (!$client) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cliente não encontrado.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data'    => new ClientResource($client),
+        ]);
     }
 }
