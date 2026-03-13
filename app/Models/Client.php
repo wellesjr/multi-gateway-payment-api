@@ -13,4 +13,9 @@ class Client extends Model
         'name',
         'email'
     ];
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Gateway;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -15,7 +16,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        Gateway::query()->updateOrCreate(
+            ['name' => 'gateway1'],
+            ['is_active' => true, 'priority' => 1],
+        );
+
+        Gateway::query()->updateOrCreate(
+            ['name' => 'gateway2'],
+            ['is_active' => true, 'priority' => 2],
+        );
 
         User::factory()->create([
             'name' => 'Test User',

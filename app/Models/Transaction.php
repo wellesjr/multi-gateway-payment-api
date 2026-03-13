@@ -10,9 +10,31 @@ class Transaction extends Model
         'client_id',
         'gateway_id',
         'external_id',
-        'status',
         'amount',
-        'card_last_numbers'
+        'status',
+        'card_last_digits',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'amount' => 'decimal:2',
+        ];
+    }
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'transaction_products')
+            ->withPivot('quantity');
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    public function gateway()
+    {
+        return $this->belongsTo(Gateway::class);
+    }
 }

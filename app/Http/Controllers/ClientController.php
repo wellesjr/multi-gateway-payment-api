@@ -38,6 +38,8 @@ class ClientController extends Controller
             ], 404);
         }
 
+        $client->load('transactions');
+
         return response()->json([
             'success' => true,
             'data'    => new ClientResource($client),
