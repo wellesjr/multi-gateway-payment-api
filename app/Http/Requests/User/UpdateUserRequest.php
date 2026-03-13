@@ -3,10 +3,12 @@
 namespace App\Http\Requests\User;
 
 use App\Enums\UserRole;
+use App\Support\ApiResponse;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
@@ -20,15 +22,7 @@ class UpdateUserRequest extends FormRequest
             return false;
         }
 
-        if ($authUser->role === UserRole::Admin) {
-            return true;
-        }
-
-        if ($authUser->role === UserRole::Manager) {
-            return $targetUser->role !== UserRole::Admin;
-        }
-
-        return $authUser->id === $targetUser->id;
+        return Gate::forUser($authUser)->allows('users.update', $targetUser);
     }
 
     public function rules(): array
@@ -72,20 +66,18 @@ class UpdateUserRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
-            response()->json([
-                'success' => false,
-                'message' => 'Erro de validação, por favor verifique os dados informados',
-                'errors'  => $validator->errors()->messages(),
-            ], 422)
+            ApiResponse::error(
+                message: 'Erro de validação, por favor verifique os dados informados',
+                status: 422,
+                errors: $validator->errors()->messages(),
+            )
         );
     }
 
     protected function failedAuthorization()
     {
         throw new HttpResponseException(
-            response()->json([
-                'message' => 'Você não tem permissão para atualizar este usuário.',
-            ], 403)
+            ApiResponse::error('Você não tem permissão para atualizar este usuário.', 403)
         );
     }
 }

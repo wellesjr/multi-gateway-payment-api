@@ -23,4 +23,9 @@ class Gateway extends Model
     {
         return $this->hasMany(Transaction::class);
     }
+
+    public function paymentAttempts()
+    {
+        return $this->hasMany(PaymentAttempt::class);
+    }
 }

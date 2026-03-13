@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\ClientService;
 use App\Http\Resources\ClientResource;
+use App\Support\ApiResponse;
 
 class ClientController extends Controller
 {
@@ -15,16 +16,16 @@ class ClientController extends Controller
     {
         $clients = $this->clientService->list();
 
-        return response()->json([
-            'success' => true,
-            'data' => ClientResource::collection($clients),
-            'meta' => [
+        return ApiResponse::success(
+            message: 'Clientes listados com sucesso.',
+            data: ClientResource::collection($clients),
+            meta: [
                 'current_page' => $clients->currentPage(),
                 'last_page' => $clients->lastPage(),
                 'per_page' => $clients->perPage(),
                 'total' => $clients->total(),
             ],
-        ]);
+        );
     }
 
     public function show(int $id)
@@ -32,15 +33,12 @@ class ClientController extends Controller
         $client = $this->clientService->findWithTransactions($id);
 
         if (!$client) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cliente não encontrado.',
-            ], 404);
+            return ApiResponse::error('Cliente não encontrado.', 404);
         }
 
-        return response()->json([
-            'success' => true,
-            'data'    => new ClientResource($client),
-        ]);
+        return ApiResponse::success(
+            message: 'Cliente encontrado com sucesso.',
+            data: new ClientResource($client),
+        );
     }
 }

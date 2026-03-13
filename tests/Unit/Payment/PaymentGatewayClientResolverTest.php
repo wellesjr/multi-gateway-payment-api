@@ -5,6 +5,7 @@ namespace Tests\Unit\Payment;
 use App\Dtos\Payment\ChargePayloadDto;
 use App\Dtos\Payment\GatewayChargeResultDto;
 use App\Repositories\Interfaces\PaymentGatewayClientInterface;
+use App\Services\Payment\GatewayRegistry;
 use App\Services\Payment\PaymentGatewayClientResolver;
 use PHPUnit\Framework\TestCase;
 
@@ -15,10 +16,10 @@ class PaymentGatewayClientResolverTest extends TestCase
         $gateway1Client = $this->makeClient('gateway1');
         $gateway2Client = $this->makeClient('gateway2');
 
-        $resolver = new PaymentGatewayClientResolver([
+        $resolver = new PaymentGatewayClientResolver(new GatewayRegistry([
             $gateway1Client,
             $gateway2Client,
-        ]);
+        ]));
 
         $resolvedClient = $resolver->resolve('gateway2');
 
@@ -27,9 +28,9 @@ class PaymentGatewayClientResolverTest extends TestCase
 
     public function test_it_throws_exception_for_unknown_gateway(): void
     {
-        $resolver = new PaymentGatewayClientResolver([
+        $resolver = new PaymentGatewayClientResolver(new GatewayRegistry([
             $this->makeClient('gateway1'),
-        ]);
+        ]));
 
         $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('Gateway não suportado: gateway3');
@@ -42,10 +43,10 @@ class PaymentGatewayClientResolverTest extends TestCase
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('Cliente de gateway duplicado registrado para: gateway1');
 
-        new PaymentGatewayClientResolver([
+        new PaymentGatewayClientResolver(new GatewayRegistry([
             $this->makeClient('gateway1'),
             $this->makeClient('gateway1'),
-        ]);
+        ]));
     }
 
     private function makeClient(string $gatewayName): PaymentGatewayClientInterface

@@ -31,6 +31,15 @@ class PurchaseTransactionRecorderServiceTest extends TestCase
             products: [
                 ['id' => $product->id, 'quantity' => 2],
             ],
+            attempts: [
+                [
+                    'gateway_id' => $gateway->id,
+                    'status' => 'success',
+                    'external_id' => 'ext-123',
+                    'error_message' => null,
+                    'attempted_at' => now(),
+                ],
+            ],
         );
 
         $this->assertSame('paid', $transaction->status);
@@ -48,6 +57,13 @@ class PurchaseTransactionRecorderServiceTest extends TestCase
             'transaction_id' => $transaction->id,
             'product_id' => $product->id,
             'quantity' => 2,
+        ]);
+
+        $this->assertDatabaseHas('payment_attempts', [
+            'transaction_id' => $transaction->id,
+            'gateway_id' => $gateway->id,
+            'status' => 'success',
+            'external_id' => 'ext-123',
         ]);
     }
 
@@ -80,5 +96,7 @@ class PurchaseTransactionRecorderServiceTest extends TestCase
             'status' => 'failed',
             'card_last_digits' => '1111',
         ]);
+
+        $this->assertDatabaseCount('payment_attempts', 0);
     }
 }

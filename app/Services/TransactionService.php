@@ -21,7 +21,7 @@ class TransactionService
 
     public function findById(int $id): ?Transaction
     {
-        return $this->transactionRepository->findWithRelations($id, ['client', 'gateway', 'products']);
+        return $this->transactionRepository->findWithRelations($id, ['client', 'gateway', 'products', 'paymentAttempts.gateway']);
     }
 
     public function refund(Transaction $transaction): Transaction
@@ -44,7 +44,7 @@ class TransactionService
 
         $updatedTransaction = $this->transactionRepository->update($transactionWithGateway, ['status' => 'refunded']);
 
-        return $this->transactionRepository->findWithRelations($updatedTransaction->id, ['client', 'gateway', 'products'])
+        return $this->transactionRepository->findWithRelations($updatedTransaction->id, ['client', 'gateway', 'products', 'paymentAttempts.gateway'])
             ?? $updatedTransaction;
     }
 }

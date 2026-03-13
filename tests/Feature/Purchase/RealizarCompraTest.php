@@ -73,6 +73,12 @@ test('realiza compra com sucesso no primeiro gateway ativo por prioridade', func
         'product_id' => $productA->id,
         'quantity' => 2,
     ]);
+
+    $this->assertDatabaseHas('payment_attempts', [
+        'gateway_id' => $gateway1->id,
+        'status' => 'success',
+        'external_id' => 'gw1-ext-123',
+    ]);
 });
 
 test('quando primeiro gateway falha tenta o segundo gateway e retorna sucesso', function () {
@@ -115,6 +121,16 @@ test('quando primeiro gateway falha tenta o segundo gateway e retorna sucesso', 
         ->assertJsonPath('data.status', 'paid')
         ->assertJsonPath('data.gateway.id', $gateway2->id)
         ->assertJsonPath('data.external_id', 'gw2-ext-xyz');
+
+    $this->assertDatabaseHas('payment_attempts', [
+        'gateway_id' => $gateway2->id,
+        'status' => 'success',
+        'external_id' => 'gw2-ext-xyz',
+    ]);
+    $this->assertDatabaseHas('payment_attempts', [
+        'status' => 'failed',
+        'error_message' => 'Gateway 1 retornou erro ao cobrar.',
+    ]);
 });
 
 test('quando gateway prioritário lança exceção esperada tenta o próximo gateway', function () {
@@ -153,6 +169,16 @@ test('quando gateway prioritário lança exceção esperada tenta o próximo gat
         ->assertJsonPath('data.status', 'paid')
         ->assertJsonPath('data.gateway.id', $gateway2->id)
         ->assertJsonPath('data.external_id', 'gw2-ext-after-exception');
+
+    $this->assertDatabaseHas('payment_attempts', [
+        'status' => 'exception',
+        'error_message' => 'Falha ao autenticar no Gateway 1.',
+    ]);
+    $this->assertDatabaseHas('payment_attempts', [
+        'gateway_id' => $gateway2->id,
+        'status' => 'success',
+        'external_id' => 'gw2-ext-after-exception',
+    ]);
 });
 
 test('quando todos os gateways falham retorna erro e registra transação como failed', function () {
@@ -192,6 +218,15 @@ test('quando todos os gateways falham retorna erro e registra transação como f
     $this->assertDatabaseHas('transactions', [
         'status' => 'failed',
         'amount' => 25.00,
+    ]);
+
+    $this->assertDatabaseHas('payment_attempts', [
+        'status' => 'failed',
+        'error_message' => 'Gateway 1 retornou erro ao cobrar.',
+    ]);
+    $this->assertDatabaseHas('payment_attempts', [
+        'status' => 'failed',
+        'error_message' => 'Gateway 2 retornou erro ao cobrar.',
     ]);
 });
 

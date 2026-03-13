@@ -37,4 +37,9 @@ class Transaction extends Model
     {
         return $this->belongsTo(Gateway::class);
     }
+
+    public function paymentAttempts()
+    {
+        return $this->hasMany(PaymentAttempt::class);
+    }
 }

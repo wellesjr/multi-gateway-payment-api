@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\ApiResponse;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -21,11 +22,11 @@ class LoginRequest extends FormRequest
      protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
-            response()->json([
-                'success' => false,
-                'message' => 'Erro de validação, por favor verifique os dados informados',
-                'errors' => $validator->errors()->messages()
-            ], 422)
+            ApiResponse::error(
+                message: 'Erro de validação, por favor verifique os dados informados',
+                status: 422,
+                errors: $validator->errors()->messages(),
+            )
         );
     }
 }

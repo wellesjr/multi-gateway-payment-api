@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Services\AuthService;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
@@ -20,13 +21,15 @@ class AuthController extends Controller
                 $request->validated('password'),
             );
         } catch (\DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 401);
+            return ApiResponse::error($e->getMessage(), 401);
         }
 
-        return response()->json([
-            'message' => 'Login realizado com sucesso',
-            'user'    => $result['user'],
-            'token'   => $result['token'],
-        ]);
+        return ApiResponse::success(
+            message: 'Login realizado com sucesso',
+            extra: [
+                'user' => $result['user'],
+                'token' => $result['token'],
+            ],
+        );
     }
 }

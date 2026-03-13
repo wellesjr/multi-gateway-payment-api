@@ -28,10 +28,12 @@ class PaymentOrchestratorService
                 'gateway' => null,
                 'external_id' => null,
                 'errors' => ['Nenhum gateway ativo encontrado.'],
+                'attempts' => [],
             ];
         }
 
         $errors = [];
+        $attempts = [];
 
         foreach ($gateways as $gateway) {
             try {
@@ -48,16 +50,34 @@ class PaymentOrchestratorService
                 ]);
 
                 $errors[] = $errorMessage;
+                $attempts[] = [
+                    'gateway_id' => $gateway->id,
+                    'gateway_name' => $gateway->name,
+                    'status' => 'exception',
+                    'external_id' => null,
+                    'error_message' => $exception->getMessage(),
+                    'attempted_at' => now(),
+                ];
 
                 continue;
             }
 
             if ($result->success) {
+                $attempts[] = [
+                    'gateway_id' => $gateway->id,
+                    'gateway_name' => $gateway->name,
+                    'status' => 'success',
+                    'external_id' => $result->externalId,
+                    'error_message' => null,
+                    'attempted_at' => now(),
+                ];
+
                 return [
                     'success' => true,
                     'gateway' => $gateway,
                     'external_id' => $result->externalId,
                     'errors' => [],
+                    'attempts' => $attempts,
                 ];
             }
 
@@ -70,6 +90,14 @@ class PaymentOrchestratorService
             ]);
 
             $errors[] = $errorMessage;
+            $attempts[] = [
+                'gateway_id' => $gateway->id,
+                'gateway_name' => $gateway->name,
+                'status' => 'failed',
+                'external_id' => null,
+                'error_message' => $errorMessage,
+                'attempted_at' => now(),
+            ];
         }
 
         Log::warning('payment.gateway.charge.all_failed', [
@@ -82,6 +110,7 @@ class PaymentOrchestratorService
             'gateway' => null,
             'external_id' => null,
             'errors' => $errors,
+            'attempts' => $attempts,
         ];
     }
 

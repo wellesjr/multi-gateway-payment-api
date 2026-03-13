@@ -9,7 +9,7 @@ use App\Http\Requests\Product\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Services\ProductService;
-
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
@@ -23,16 +23,16 @@ class ProductController extends Controller
     {
         $products = $this->productService->list();
 
-        return response()->json([
-            'success' => true,
-            'data'    => ProductResource::collection($products),
-            'meta'    => [
+        return ApiResponse::success(
+            message: 'Produtos listados com sucesso.',
+            data: ProductResource::collection($products),
+            meta: [
                 'current_page' => $products->currentPage(),
                 'last_page'    => $products->lastPage(),
                 'per_page'     => $products->perPage(),
                 'total'        => $products->total(),
             ],
-        ]);
+        );
     }
 
     public function store(StoreProductRequest $request): JsonResponse
@@ -40,19 +40,19 @@ class ProductController extends Controller
         $dto     = CreateProductDto::fromRequest($request);
         $product = $this->productService->create($dto);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Produto criado com sucesso.',
-            'data'    => new ProductResource($product),
-        ], 201);
+        return ApiResponse::success(
+            message: 'Produto criado com sucesso.',
+            data: new ProductResource($product),
+            status: 201,
+        );
     }
 
     public function show(Product $product): JsonResponse
     {
-        return response()->json([
-            'success' => true,
-            'data'    => new ProductResource($product),
-        ]);
+        return ApiResponse::success(
+            message: 'Produto encontrado com sucesso.',
+            data: new ProductResource($product),
+        );
     }
 
     public function update(UpdateProductRequest $request, Product $product): JsonResponse|Response
@@ -65,20 +65,16 @@ class ProductController extends Controller
 
         $updatedProduct = $this->productService->update($product, $dto);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Produto atualizado com sucesso.',
-            'data'    => new ProductResource($updatedProduct),
-        ]);
+        return ApiResponse::success(
+            message: 'Produto atualizado com sucesso.',
+            data: new ProductResource($updatedProduct),
+        );
     }
 
     public function destroy(Product $product): JsonResponse
     {
         $this->productService->delete($product);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Produto excluído com sucesso.',
-        ]);
+        return ApiResponse::success('Produto excluído com sucesso.');
     }
 }

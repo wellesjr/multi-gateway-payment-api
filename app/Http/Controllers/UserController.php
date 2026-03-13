@@ -9,6 +9,7 @@ use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\UserService;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
@@ -22,16 +23,16 @@ class UserController extends Controller
     {
         $users = $this->userService->list();
 
-        return response()->json([
-            'success' => true,
-            'data' => UserResource::collection($users),
-            'meta' => [
+        return ApiResponse::success(
+            message: 'Usuários listados com sucesso.',
+            data: UserResource::collection($users),
+            meta: [
                 'current_page' => $users->currentPage(),
                 'last_page' => $users->lastPage(),
                 'per_page' => $users->perPage(),
                 'total' => $users->total(),
             ],
-        ]);
+        );
     }
 
     public function store(StoreUserRequest $request): JsonResponse
@@ -39,21 +40,21 @@ class UserController extends Controller
         $dto = CreateUserDto::fromRequest($request);
         $user = $this->userService->create($dto);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Usuário criado com sucesso.',
-            'data' => new UserResource($user),
-        ], 201);
+        return ApiResponse::success(
+            message: 'Usuário criado com sucesso.',
+            data: new UserResource($user),
+            status: 201,
+        );
     }
 
     public function show(User $user): JsonResponse
     {
         $resource = new UserResource($user);
 
-        return response()->json([
-            'success' => true,
-            'data' => $resource->toArray(request()),
-        ]);
+        return ApiResponse::success(
+            message: 'Usuário encontrado com sucesso.',
+            data: $resource->toArray(request()),
+        );
     }
 
     public function update(UpdateUserRequest $request, User $user): JsonResponse|Response
@@ -67,11 +68,10 @@ class UserController extends Controller
         $updatedUser = $this->userService->update($user, $dto);
         $resource = new UserResource($updatedUser);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Usuário atualizado com sucesso.',
-            'data' => $resource->toArrayUpdate(request()),
-        ]);
+        return ApiResponse::success(
+            message: 'Usuário atualizado com sucesso.',
+            data: $resource->toArrayUpdate(request()),
+        );
     }
 
     public function destroy(User $user): JsonResponse|Response
@@ -79,15 +79,9 @@ class UserController extends Controller
         try {
             $this->userService->delete($user, request()->user());
         } catch (\DomainException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 403);
+            return ApiResponse::error($e->getMessage(), 403);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Usuário excluído com sucesso.',
-        ]);
+        return ApiResponse::success('Usuário excluído com sucesso.');
     }
 }

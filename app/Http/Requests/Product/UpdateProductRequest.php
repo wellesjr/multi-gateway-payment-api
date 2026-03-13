@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests\Product;
 
-use App\Enums\UserRole;
+use App\Support\ApiResponse;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Gate;
 
 class UpdateProductRequest extends FormRequest
 {
@@ -17,7 +18,7 @@ class UpdateProductRequest extends FormRequest
             return false;
         }
 
-        return in_array($user->role, [UserRole::Admin, UserRole::Manager], true);
+        return Gate::forUser($user)->allows('products.manage');
     }
 
     public function rules(): array
@@ -40,21 +41,18 @@ class UpdateProductRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
-            response()->json([
-                'success' => false,
-                'message' => 'Erro de validação, por favor verifique os dados informados',
-                'errors'  => $validator->errors()->messages(),
-            ], 422)
+            ApiResponse::error(
+                message: 'Erro de validação, por favor verifique os dados informados',
+                status: 422,
+                errors: $validator->errors()->messages(),
+            )
         );
     }
 
     protected function failedAuthorization()
     {
         throw new HttpResponseException(
-            response()->json([
-                'success' => false,
-                'message' => 'Você não tem permissão para atualizar este produto.',
-            ], 403)
+            ApiResponse::error('Você não tem permissão para atualizar este produto.', 403)
         );
     }
 }

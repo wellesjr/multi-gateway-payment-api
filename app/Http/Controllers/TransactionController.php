@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\TransactionResource;
 use App\Models\Transaction;
 use App\Services\TransactionService;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 
 class TransactionController extends Controller
@@ -17,16 +18,16 @@ class TransactionController extends Controller
     {
         $transactions = $this->transactionService->list();
 
-        return response()->json([
-            'success' => true,
-            'data' => TransactionResource::collection($transactions),
-            'meta' => [
+        return ApiResponse::success(
+            message: 'Transações listadas com sucesso.',
+            data: TransactionResource::collection($transactions),
+            meta: [
                 'current_page' => $transactions->currentPage(),
                 'last_page' => $transactions->lastPage(),
                 'per_page' => $transactions->perPage(),
                 'total' => $transactions->total(),
             ],
-        ]);
+        );
     }
 
     public function show(Transaction $transaction): JsonResponse
@@ -34,16 +35,13 @@ class TransactionController extends Controller
         $loadedTransaction = $this->transactionService->findById($transaction->id);
 
         if (!$loadedTransaction) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Transação não encontrada.',
-            ], 404);
+            return ApiResponse::error('Transação não encontrada.', 404);
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => new TransactionResource($loadedTransaction),
-        ]);
+        return ApiResponse::success(
+            message: 'Transação encontrada com sucesso.',
+            data: new TransactionResource($loadedTransaction),
+        );
     }
 
     public function refund(Transaction $transaction): JsonResponse
@@ -51,16 +49,12 @@ class TransactionController extends Controller
         try {
             $refunded = $this->transactionService->refund($transaction);
         } catch (\DomainException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 422);
+            return ApiResponse::error($e->getMessage(), 422);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Reembolso realizado com sucesso.',
-            'data' => new TransactionResource($refunded),
-        ]);
+        return ApiResponse::success(
+            message: 'Reembolso realizado com sucesso.',
+            data: new TransactionResource($refunded),
+        );
     }
 }

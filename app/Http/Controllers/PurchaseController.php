@@ -6,6 +6,7 @@ use App\Dtos\Purchase\PurchaseDto;
 use App\Http\Requests\Purchase\StorePurchaseRequest;
 use App\Http\Resources\TransactionResource;
 use App\Services\PurchaseService;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 
 class PurchaseController extends Controller
@@ -19,24 +20,21 @@ class PurchaseController extends Controller
         try {
             $result = $this->purchaseService->purchase(PurchaseDto::fromArray($request->validated()));
         } catch (\DomainException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 422);
+            return ApiResponse::error($e->getMessage(), 422);
         }
 
         if (!$result['success']) {
-            return response()->json([
-                'success' => false,
-                'message' => $result['message'],
-                'data' => new TransactionResource($result['transaction']),
-            ], 422);
+            return ApiResponse::error(
+                message: $result['message'],
+                status: 422,
+                data: new TransactionResource($result['transaction']),
+            );
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => $result['message'],
-            'data' => new TransactionResource($result['transaction']),
-        ], 201);
+        return ApiResponse::success(
+            message: $result['message'],
+            data: new TransactionResource($result['transaction']),
+            status: 201,
+        );
     }
 }

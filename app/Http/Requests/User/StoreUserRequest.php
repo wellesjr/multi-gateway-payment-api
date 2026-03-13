@@ -6,6 +6,8 @@ use App\Enums\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Support\ApiResponse;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
@@ -18,7 +20,7 @@ class StoreUserRequest extends FormRequest
             return false;
         }
 
-        return in_array($user->role, [UserRole::Admin, UserRole::Manager], true);
+        return Gate::forUser($user)->allows('users.create');
     }
 
     public function rules(): array
@@ -57,20 +59,18 @@ class StoreUserRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
-            response()->json([
-                'success' => false,
-                'message' => 'Erro de validação, por favor verifique os dados informados',
-                'errors'  => $validator->errors()->messages(),
-            ], 422)
+            ApiResponse::error(
+                message: 'Erro de validação, por favor verifique os dados informados',
+                status: 422,
+                errors: $validator->errors()->messages(),
+            )
         );
     }
 
     protected function failedAuthorization()
     {
         throw new HttpResponseException(
-            response()->json([
-                'message' => 'Você não tem permissão para criar usuários.',
-            ], 403)
+            ApiResponse::error('Você não tem permissão para criar usuários.', 403)
         );
     }
 }

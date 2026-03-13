@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\ForceJsonResponse;
+use App\Support\ApiResponse;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -27,23 +28,14 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->renderable(function (NotFoundHttpException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Recurso não encontrado.',
-            ], 404);
+            return ApiResponse::error('Recurso não encontrado.', 404);
         });
 
         $exceptions->renderable(function (MethodNotAllowedHttpException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Método HTTP não permitido.',
-            ], 405);
+            return ApiResponse::error('Método HTTP não permitido.', 405);
         });
 
         $exceptions->renderable(function (TooManyRequestsHttpException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Muitas requisições. Tente novamente em instantes.',
-            ], 429);
+            return ApiResponse::error('Muitas requisições. Tente novamente em instantes.', 429);
         });
     })->create();

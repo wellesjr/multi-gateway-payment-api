@@ -43,6 +43,23 @@ class TransactionResource extends JsonResource
                     ];
                 })->all();
             }),
+            'payment_attempts' => $this->whenLoaded('paymentAttempts', function () {
+                return $this->paymentAttempts->map(function ($attempt) {
+                    return [
+                        'id' => $attempt->id,
+                        'status' => $attempt->status,
+                        'external_id' => $attempt->external_id,
+                        'error_message' => $attempt->error_message,
+                        'attempted_at' => $attempt->attempted_at,
+                        'gateway' => $attempt->relationLoaded('gateway') && $attempt->gateway
+                            ? [
+                                'id' => $attempt->gateway->id,
+                                'name' => $attempt->gateway->name,
+                            ]
+                            : null,
+                    ];
+                })->all();
+            }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
