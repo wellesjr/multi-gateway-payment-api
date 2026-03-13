@@ -117,6 +117,44 @@ test('quando primeiro gateway falha tenta o segundo gateway e retorna sucesso', 
         ->assertJsonPath('data.external_id', 'gw2-ext-xyz');
 });
 
+test('quando gateway prioritário lança exceção esperada tenta o próximo gateway', function () {
+    /** @var TestCase $this */
+
+    config([
+        'services.gateway1.url' => 'http://gateway1.local',
+        'services.gateway1.email' => 'dev@betalent.tech',
+        'services.gateway1.token' => 'TOKEN',
+        'services.gateway2.url' => 'http://gateway2.local',
+        'services.gateway2.auth_token' => 'AUTH',
+        'services.gateway2.auth_secret' => 'SECRET',
+    ]);
+
+    Gateway::factory()->create(['name' => 'gateway1', 'priority' => 1, 'is_active' => true]);
+    $gateway2 = Gateway::factory()->create(['name' => 'gateway2', 'priority' => 2, 'is_active' => true]);
+
+    $product = Product::factory()->create(['amount' => 19.90]);
+
+    Http::fake([
+        'http://gateway1.local/login' => Http::response([
+            'message' => 'falha de autenticação',
+        ], 500),
+        'http://gateway2.local/transacoes' => Http::response([
+            'id' => 'gw2-ext-after-exception',
+            'status' => 'ok',
+        ], 201),
+    ]);
+
+    $response = $this->postJson('/api/comprar', payloadCompra([
+        ['id' => $product->id, 'quantity' => 1],
+    ]));
+
+    $response->assertStatus(201)
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('data.status', 'paid')
+        ->assertJsonPath('data.gateway.id', $gateway2->id)
+        ->assertJsonPath('data.external_id', 'gw2-ext-after-exception');
+});
+
 test('quando todos os gateways falham retorna erro e registra transação como failed', function () {
     /** @var TestCase $this */
 

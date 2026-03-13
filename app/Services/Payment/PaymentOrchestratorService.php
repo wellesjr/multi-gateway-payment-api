@@ -6,6 +6,8 @@ use App\Models\Gateway;
 use App\Models\Transaction;
 use App\Dtos\Payment\ChargePayloadDto;
 use App\Repositories\Interfaces\GatewayRepositoryInterface;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Log;
 
 class PaymentOrchestratorService
 {
@@ -19,6 +21,8 @@ class PaymentOrchestratorService
         $gateways = $this->gatewayRepository->activeOrderedByPriority();
 
         if ($gateways->isEmpty()) {
+            Log::warning('payment.gateway.none_active');
+
             return [
                 'success' => false,
                 'gateway' => null,
@@ -33,21 +37,45 @@ class PaymentOrchestratorService
             try {
                 $client = $this->gatewayClientResolver->resolve($gateway->name);
                 $result = $client->charge($payload);
+            } catch (\DomainException|ConnectionException $exception) {
+                $errorMessage = "Falha ao processar no gateway {$gateway->name}.";
 
-                if ($result->success) {
-                    return [
-                        'success' => true,
-                        'gateway' => $gateway,
-                        'external_id' => $result->externalId,
-                        'errors' => [],
-                    ];
-                }
+                Log::warning('payment.gateway.charge.exception', [
+                    'gateway_id' => $gateway->id,
+                    'gateway_name' => $gateway->name,
+                    'exception_class' => $exception::class,
+                    'exception_message' => $exception->getMessage(),
+                ]);
 
-                $errors[] = $result->error ?? "Falha ao processar no gateway {$gateway->name}.";
-            } catch (\Throwable $e) {
-                $errors[] = "Falha ao processar no gateway {$gateway->name}.";
+                $errors[] = $errorMessage;
+
+                continue;
             }
+
+            if ($result->success) {
+                return [
+                    'success' => true,
+                    'gateway' => $gateway,
+                    'external_id' => $result->externalId,
+                    'errors' => [],
+                ];
+            }
+
+            $errorMessage = $result->error ?? "Falha ao processar no gateway {$gateway->name}.";
+
+            Log::warning('payment.gateway.charge.failed', [
+                'gateway_id' => $gateway->id,
+                'gateway_name' => $gateway->name,
+                'gateway_error' => $result->error,
+            ]);
+
+            $errors[] = $errorMessage;
         }
+
+        Log::warning('payment.gateway.charge.all_failed', [
+            'attempted_gateways' => $gateways->pluck('name')->values()->all(),
+            'errors' => $errors,
+        ]);
 
         return [
             'success' => false,
