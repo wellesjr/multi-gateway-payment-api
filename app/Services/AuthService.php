@@ -18,7 +18,12 @@ class AuthService
             throw new \DomainException('Não foi possível recuperar o usuário autenticado.');
         }
 
-        $token = $user->createToken('api-token')->plainTextToken;
+        $expirationMinutes = max(1, (int) config('sanctum.expiration', 5));
+        $token = $user->createToken(
+            'api-token',
+            ['*'],
+            now()->addMinutes($expirationMinutes),
+        )->plainTextToken;
 
         return new LoginResultDto(
             user: $user,
