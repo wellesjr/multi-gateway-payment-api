@@ -29,7 +29,7 @@ test('usuário com role USER não pode excluir produtos', function () {
         ->assertStatus(403);
 });
 
-test('usuário com role MANAGER não pode excluir produtos', function () {
+test('usuário com role MANAGER pode excluir produtos', function () {
 
     /** @var TestCase $this
      * @var User $manager
@@ -39,10 +39,10 @@ test('usuário com role MANAGER não pode excluir produtos', function () {
 
     $this->actingAs($manager)
         ->deleteJson("/api/v1/products/{$product->id}")
-        ->assertStatus(403);
+        ->assertStatus(200);
 });
 
-test('usuário com role FINANCE não pode excluir produtos', function () {
+test('usuário com role FINANCE pode excluir produtos', function () {
 
     /** @var TestCase $this
      * @var User $finance
@@ -52,7 +52,7 @@ test('usuário com role FINANCE não pode excluir produtos', function () {
 
     $this->actingAs($finance)
         ->deleteJson("/api/v1/products/{$product->id}")
-        ->assertStatus(403);
+        ->assertStatus(200);
 });
 
 test('ADMIN pode excluir produto', function () {

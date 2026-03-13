@@ -15,7 +15,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
         Route::get('/users/{user}', [UserController::class, 'show']);
     });
 
-    Route::middleware('can:users.delete')->group(function () {
+    Route::middleware('can:users.delete-target,user')->group(function () {
         Route::delete('/users/{user}', [UserController::class, 'destroy']);
     });
 });

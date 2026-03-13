@@ -46,7 +46,7 @@ test('ADMIN pode listar clientes', function () {
         ->assertJson(['success' => true]);
 });
 
-test('MANAGER pode listar clientes', function () {
+test('usuário com role MANAGER não pode listar clientes', function () {
 
     /** @var TestCase $this
      * @var User $manager
@@ -57,11 +57,10 @@ test('MANAGER pode listar clientes', function () {
     $response = $this->actingAs($manager)
         ->getJson('/api/v1/clients');
 
-    $response->assertStatus(200)
-        ->assertJson(['success' => true]);
+    $response->assertStatus(403);
 });
 
-test('FINANCE pode listar clientes', function () {
+test('usuário com role FINANCE não pode listar clientes', function () {
 
     /** @var TestCase $this
      * @var User $finance
@@ -72,8 +71,7 @@ test('FINANCE pode listar clientes', function () {
     $response = $this->actingAs($finance)
         ->getJson('/api/v1/clients');
 
-    $response->assertStatus(200)
-        ->assertJson(['success' => true]);
+    $response->assertStatus(403);
 });
 
 test('listar clientes retorna paginação correta', function () {

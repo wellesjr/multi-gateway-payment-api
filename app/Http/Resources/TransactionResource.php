@@ -12,6 +12,9 @@ class TransactionResource extends JsonResource
         return [
             'id' => $this->id,
             'status' => $this->status?->value ?? $this->status,
+            'reconciliation_status' => $this->reconciliation_status?->value ?? $this->reconciliation_status,
+            'reconciled_at' => $this->reconciled_at,
+            'reconciliation_error' => $this->reconciliation_error,
             'amount' => $this->amount,
             'external_id' => $this->external_id,
             'card_last_digits' => $this->card_last_digits,

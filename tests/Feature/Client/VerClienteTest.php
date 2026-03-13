@@ -51,7 +51,7 @@ test('ADMIN pode ver cliente', function () {
         ]);
 });
 
-test('MANAGER pode ver cliente', function () {
+test('usuário com role MANAGER não pode ver cliente', function () {
 
     /** @var TestCase $this
      * @var User $manager
@@ -61,10 +61,10 @@ test('MANAGER pode ver cliente', function () {
 
     $this->actingAs($manager)
         ->getJson("/api/v1/clients/{$client->id}")
-        ->assertStatus(200);
+        ->assertStatus(403);
 });
 
-test('FINANCE pode ver cliente', function () {
+test('usuário com role FINANCE não pode ver cliente', function () {
 
     /** @var TestCase $this
      * @var User $finance
@@ -74,7 +74,7 @@ test('FINANCE pode ver cliente', function () {
 
     $this->actingAs($finance)
         ->getJson("/api/v1/clients/{$client->id}")
-        ->assertStatus(200);
+        ->assertStatus(403);
 });
 
 test('ver cliente retorna estrutura correta', function () {

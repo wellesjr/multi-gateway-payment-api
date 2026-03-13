@@ -29,7 +29,7 @@ test('usuário com role USER não pode excluir usuários', function () {
         ->assertStatus(403);
 });
 
-test('usuário com role MANAGER não pode excluir usuários', function () {
+test('usuário com role MANAGER pode excluir usuários não ADMIN', function () {
 
     /** @var \Tests\TestCase $this 
      * @var User $manager
@@ -40,7 +40,7 @@ test('usuário com role MANAGER não pode excluir usuários', function () {
 
     $this->actingAs($manager)
         ->deleteJson("/api/v1/users/{$target->id}")
-        ->assertStatus(403);
+        ->assertStatus(200);
 });
 
 test('usuário com role FINANCE não pode excluir usuários', function () {

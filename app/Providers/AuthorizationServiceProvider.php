@@ -12,8 +12,7 @@ class AuthorizationServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->defineRoleGate('users.manage', UserRole::Admin, UserRole::Manager);
-        $this->defineRoleGate('users.view', UserRole::Admin, UserRole::Manager, UserRole::Finance);
-        $this->defineRoleGate('users.delete', UserRole::Admin);
+        $this->defineRoleGate('users.view', UserRole::Admin, UserRole::Manager);
 
         Gate::define('users.update-target', function (User $user, User $targetUser): bool {
             if ($user->role === UserRole::Admin) {
@@ -27,15 +26,27 @@ class AuthorizationServiceProvider extends ServiceProvider
             return false;
         });
 
-        $this->defineRoleGate('products.manage', UserRole::Admin, UserRole::Manager);
-        $this->defineRoleGate('products.view', UserRole::Admin, UserRole::Manager, UserRole::Finance);
-        $this->defineRoleGate('products.delete', UserRole::Admin);
+        Gate::define('users.delete-target', function (User $user, User $targetUser): bool {
+            if ($user->role === UserRole::Admin) {
+                return true;
+            }
 
-        $this->defineRoleGate('clients.view', UserRole::Admin, UserRole::Manager, UserRole::Finance);
+            if ($user->role === UserRole::Manager) {
+                return $targetUser->role !== UserRole::Admin;
+            }
+
+            return false;
+        });
+
+        $this->defineRoleGate('products.manage', UserRole::Admin, UserRole::Manager, UserRole::Finance);
+        $this->defineRoleGate('products.view', UserRole::Admin, UserRole::Manager, UserRole::Finance);
+        $this->defineRoleGate('products.delete', UserRole::Admin, UserRole::Manager, UserRole::Finance);
+
+        $this->defineRoleGate('clients.view', UserRole::Admin);
 
         $this->defineRoleGate('gateways.manage', UserRole::Admin);
 
-        $this->defineRoleGate('transactions.view', UserRole::Admin, UserRole::Manager, UserRole::Finance);
+        $this->defineRoleGate('transactions.view', UserRole::Admin);
         $this->defineRoleGate('transactions.refund', UserRole::Admin, UserRole::Finance);
     }
 

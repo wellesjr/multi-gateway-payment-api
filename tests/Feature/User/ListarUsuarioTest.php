@@ -153,7 +153,7 @@ test('MANAGER pode visualizar qualquer usuário', function () {
         ->assertStatus(200);
 });
 
-test('FINANCE pode visualizar qualquer usuário', function () {
+test('FINANCE não pode visualizar usuários', function () {
 
     /** @var \Tests\TestCase $this
      * @var User $finance
@@ -164,7 +164,7 @@ test('FINANCE pode visualizar qualquer usuário', function () {
 
     $this->actingAs($finance)
         ->getJson("/api/v1/users/{$target->id}")
-        ->assertStatus(200);
+        ->assertStatus(403);
 });
 
 test('retorna 404 para usuário inexistente', function () {

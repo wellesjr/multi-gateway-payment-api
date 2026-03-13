@@ -26,7 +26,7 @@ test('usuário com role USER não pode listar produtos', function () {
         ->assertStatus(403);
 });
 
-test('usuário com role FINANCE não pode listar produtos', function () {
+test('usuário com role FINANCE pode listar produtos', function () {
 
     /** @var TestCase $this
      * @var User $user
@@ -35,7 +35,7 @@ test('usuário com role FINANCE não pode listar produtos', function () {
 
     $this->actingAs($user)
         ->getJson('/api/v1/products')
-        ->assertStatus(403);
+        ->assertStatus(200);
 });
 
 test('ADMIN pode listar produtos', function () {

@@ -28,7 +28,7 @@ test('usuário com role USER não pode criar produtos', function () {
         ->assertStatus(403);
 });
 
-test('usuário com role FINANCE não pode criar produtos', function () {
+test('usuário com role FINANCE pode criar produtos', function () {
 
     /** @var TestCase $this
      * @var User $user
@@ -40,7 +40,7 @@ test('usuário com role FINANCE não pode criar produtos', function () {
             'name' => 'Produto Teste',
             'amount' => 10.50,
         ])
-        ->assertStatus(403);
+        ->assertStatus(201);
 });
 
 test('ADMIN pode criar produto com sucesso', function () {

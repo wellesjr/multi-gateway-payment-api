@@ -51,7 +51,7 @@ test('realiza compra com sucesso no primeiro gateway ativo por prioridade', func
         'http://gateway2.local/*' => Http::response([], 500),
     ]);
 
-    $response = $this->postJson('/api/comprar', payloadCompra([
+    $response = $this->postJson('/api/purchase', payloadCompra([
         ['id' => $productA->id, 'quantity' => 2],
         ['id' => $productB->id, 'quantity' => 1],
     ]));
@@ -112,7 +112,7 @@ test('quando primeiro gateway falha tenta o segundo gateway e retorna sucesso', 
         ], 201),
     ]);
 
-    $response = $this->postJson('/api/comprar', payloadCompra([
+    $response = $this->postJson('/api/purchase', payloadCompra([
         ['id' => $product->id, 'quantity' => 1],
     ]));
 
@@ -160,7 +160,7 @@ test('quando gateway prioritário lança exceção esperada tenta o próximo gat
         ], 201),
     ]);
 
-    $response = $this->postJson('/api/comprar', payloadCompra([
+    $response = $this->postJson('/api/purchase', payloadCompra([
         ['id' => $product->id, 'quantity' => 1],
     ]));
 
@@ -207,7 +207,7 @@ test('quando todos os gateways falham retorna erro e registra transação como f
         'http://gateway2.local/transacoes' => Http::response(['message' => 'erro 2'], 422),
     ]);
 
-    $response = $this->postJson('/api/comprar', payloadCompra([
+    $response = $this->postJson('/api/purchase', payloadCompra([
         ['id' => $product->id, 'quantity' => 2],
     ]));
 
@@ -233,7 +233,7 @@ test('quando todos os gateways falham retorna erro e registra transação como f
 test('valida payload de compra', function () {
     /** @var TestCase $this */
 
-    $response = $this->postJson('/api/comprar', []);
+    $response = $this->postJson('/api/purchase', []);
 
     $response->assertStatus(422)
         ->assertJsonValidationErrors(['client.name', 'client.email', 'products', 'card_number', 'cvv']);

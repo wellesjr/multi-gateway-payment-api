@@ -47,7 +47,10 @@ class TransactionController extends Controller
     public function refund(Transaction $transaction): JsonResponse
     {
         try {
-            $refunded = $this->transactionService->refund($transaction);
+            $refunded = $this->transactionService->refund(
+                $transaction,
+                request()->header('Idempotency-Key'),
+            );
         } catch (\DomainException $e) {
             return ApiResponse::error($e->getMessage(), 422);
         }

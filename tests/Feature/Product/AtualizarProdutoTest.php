@@ -30,7 +30,7 @@ test('usuário com role USER não pode atualizar produto', function () {
         ->assertStatus(403);
 });
 
-test('usuário com role FINANCE não pode atualizar produto', function () {
+test('usuário com role FINANCE pode atualizar produto', function () {
 
     /** @var TestCase $this
      * @var User $user
@@ -40,7 +40,7 @@ test('usuário com role FINANCE não pode atualizar produto', function () {
 
     $this->actingAs($user)
         ->putJson("/api/v1/products/{$product->id}", ['name' => 'Tentativa'])
-        ->assertStatus(403);
+        ->assertStatus(200);
 });
 
 test('ADMIN pode atualizar produto', function () {

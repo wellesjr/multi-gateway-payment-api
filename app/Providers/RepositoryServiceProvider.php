@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Repositories\ClientRepository;
 use App\Repositories\GatewayRepository;
+use App\Repositories\IdempotencyKeyRepository;
 use App\Repositories\Interfaces\ClientRepositoryInterface;
 use App\Repositories\Interfaces\GatewayRepositoryInterface;
+use App\Repositories\Interfaces\IdempotencyKeyRepositoryInterface;
 use App\Repositories\Interfaces\PaymentAttemptRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\TransactionRepositoryInterface;
@@ -27,6 +29,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(GatewayRepositoryInterface::class, GatewayRepository::class);
         $this->app->bind(TransactionRepositoryInterface::class, TransactionRepository::class);
         $this->app->bind(PaymentAttemptRepositoryInterface::class, PaymentAttemptRepository::class);
+        $this->app->bind(IdempotencyKeyRepositoryInterface::class, IdempotencyKeyRepository::class);
 
         $gatewayClients = config('payment.gateway_clients', []);
 

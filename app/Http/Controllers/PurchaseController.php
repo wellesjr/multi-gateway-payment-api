@@ -18,7 +18,10 @@ class PurchaseController extends Controller
     public function store(StorePurchaseRequest $request): JsonResponse
     {
         try {
-            $result = $this->purchaseService->purchase(PurchaseDto::fromArray($request->validated()));
+            $result = $this->purchaseService->purchase(
+                PurchaseDto::fromArray($request->validated()),
+                $request->header('Idempotency-Key'),
+            );
         } catch (\DomainException $e) {
             return ApiResponse::error($e->getMessage(), 422);
         }
@@ -34,7 +37,7 @@ class PurchaseController extends Controller
         return ApiResponse::success(
             message: $result->message,
             data: new TransactionResource($result->transaction),
-            status: 201,
+            status: $result->message === 'Compra já processada anteriormente.' ? 200 : 201,
         );
     }
 }
