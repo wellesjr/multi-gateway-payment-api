@@ -62,6 +62,14 @@ test('realiza compra com sucesso no primeiro gateway ativo por prioridade', func
         ->assertJsonPath('data.gateway.id', $gateway1->id)
         ->assertJsonPath('data.external_id', 'gw1-ext-123');
 
+    Http::assertSent(function ($request) {
+        if ($request->url() !== 'http://gateway1.local/transactions') {
+            return false;
+        }
+
+        return ((int) ($request['amount'] ?? 0)) === 2500;
+    });
+
     $this->assertDatabaseHas('transactions', [
         'gateway_id' => $gateway1->id,
         'status' => 'paid',
@@ -121,6 +129,14 @@ test('quando primeiro gateway falha tenta o segundo gateway e retorna sucesso', 
         ->assertJsonPath('data.status', 'paid')
         ->assertJsonPath('data.gateway.id', $gateway2->id)
         ->assertJsonPath('data.external_id', 'gw2-ext-xyz');
+
+    Http::assertSent(function ($request) {
+        if ($request->url() !== 'http://gateway2.local/transacoes') {
+            return false;
+        }
+
+        return ((int) ($request['valor'] ?? 0)) === 4990;
+    });
 
     $this->assertDatabaseHas('payment_attempts', [
         'gateway_id' => $gateway2->id,

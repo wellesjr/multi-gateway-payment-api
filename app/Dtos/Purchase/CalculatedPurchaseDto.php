@@ -9,6 +9,7 @@ readonly class CalculatedPurchaseDto
      */
     public function __construct(
         public float $amount,
+        public int $amountInCents,
         public array $products,
     ) {}
 }

@@ -21,7 +21,7 @@ class ResolvePurchasePaymentUseCase
         $calculatedPurchase = $this->purchaseAmountCalculator->calculate($dto->products);
 
         $payment = $this->paymentOrchestrator->charge(new ChargePayloadDto(
-            amountInCents: (int) round($calculatedPurchase->amount * 100),
+            amountInCents: $calculatedPurchase->amountInCents,
             name: $client->name,
             email: $client->email,
             cardNumber: $dto->cardNumber,

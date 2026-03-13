@@ -24,10 +24,27 @@ class PurchaseAmountCalculatorServiceTest extends TestCase
         ]);
 
         $this->assertEquals(33.50, $result->amount);
+        $this->assertSame(3350, $result->amountInCents);
         $this->assertSame([
             ['id' => $productA->id, 'quantity' => 2],
             ['id' => $productB->id, 'quantity' => 3],
         ], $result->products);
+    }
+
+    public function test_it_calculates_cents_without_float_precision_drift(): void
+    {
+        $productA = Product::factory()->create(['amount' => 0.10]);
+        $productB = Product::factory()->create(['amount' => 0.20]);
+
+        $service = app(PurchaseAmountCalculatorService::class);
+
+        $result = $service->calculate([
+            ['id' => $productA->id, 'quantity' => 1],
+            ['id' => $productB->id, 'quantity' => 1],
+        ]);
+
+        $this->assertSame(30, $result->amountInCents);
+        $this->assertEquals(0.30, $result->amount);
     }
 
     public function test_it_throws_exception_when_product_is_missing(): void
