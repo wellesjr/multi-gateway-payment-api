@@ -3,7 +3,6 @@
 namespace App\UseCases\Purchase;
 
 use App\Dtos\Payment\ChargePayloadDto;
-use App\Dtos\Purchase\CalculatedPurchaseDto;
 use App\Dtos\Purchase\PurchaseDto;
 use App\Models\Client;
 use App\Services\Payment\PaymentOrchestratorService;

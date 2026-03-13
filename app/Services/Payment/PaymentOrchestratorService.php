@@ -2,7 +2,6 @@
 
 namespace App\Services\Payment;
 
-use App\Models\Gateway;
 use App\Models\Transaction;
 use App\Dtos\Payment\ChargePayloadDto;
 use App\Repositories\Interfaces\GatewayRepositoryInterface;

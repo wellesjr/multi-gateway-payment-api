@@ -5,7 +5,6 @@ namespace App\UseCases\Purchase;
 use App\Dtos\Purchase\CalculatedPurchaseDto;
 use App\Dtos\Purchase\PurchaseDto;
 use App\Models\Client;
-use App\Models\Transaction;
 use App\Repositories\Interfaces\TransactionRepositoryInterface;
 use App\Services\Purchase\PurchaseTransactionRecorderService;
 
