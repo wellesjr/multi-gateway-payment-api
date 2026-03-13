@@ -156,9 +156,11 @@ test('matriz RBAC segue exatamente o desafio', function () {
             $expectedStatus = $operation['expected'][$roleName];
             $actualStatus = $response->getStatusCode();
 
-            if ($actualStatus !== $expectedStatus) {
-                throw new \RuntimeException("Falha em {$operationName} para role {$roleName}: esperado {$expectedStatus}, recebido {$actualStatus}.");
-            }
+            $this->assertSame(
+                $expectedStatus,
+                $actualStatus,
+                "Falha em {$operationName} para role {$roleName}: esperado {$expectedStatus}, recebido {$actualStatus}.",
+            );
         }
     }
 });
