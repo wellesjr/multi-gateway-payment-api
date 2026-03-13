@@ -3,9 +3,10 @@
 namespace App\Services;
 
 use App\Dtos\Purchase\PurchaseDto;
-use App\Models\Product;
 use App\Models\Transaction;
 use App\Dtos\Payment\ChargePayloadDto;
+use App\Services\Purchase\PurchaseAmountCalculatorService;
+use App\Services\Purchase\PurchaseTransactionRecorderService;
 use App\Services\Payment\PaymentOrchestratorService;
 use Illuminate\Support\Facades\DB;
 
@@ -14,6 +15,8 @@ class PurchaseService
     public function __construct(
         private readonly ClientService $clientService,
         private readonly PaymentOrchestratorService $paymentOrchestrator,
+        private readonly PurchaseAmountCalculatorService $purchaseAmountCalculator,
+        private readonly PurchaseTransactionRecorderService $purchaseTransactionRecorder,
     ) {}
 
     /**
@@ -27,46 +30,25 @@ class PurchaseService
                 $dto->clientEmail,
             );
 
-            $products = Product::whereIn(
-                'id',
-                collect($dto->products)->pluck('id'),
-            )->get();
-
-            $amount = 0;
-
-            foreach ($dto->products as $item) {
-                $product = $products->firstWhere('id', $item['id']);
-
-                if (!$product) {
-                    throw new \DomainException('Produto informado não foi encontrado.');
-                }
-
-                $amount += (float) $product->amount * $item['quantity'];
-            }
+            $calculatedPurchase = $this->purchaseAmountCalculator->calculate($dto->products);
 
             $payment = $this->paymentOrchestrator->charge(new ChargePayloadDto(
-                amountInCents: (int) round($amount * 100),
+                amountInCents: (int) round($calculatedPurchase->amount * 100),
                 name: $client->name,
                 email: $client->email,
                 cardNumber: $dto->cardNumber,
                 cvv: $dto->cvv,
             ));
 
-            $transaction = Transaction::create([
-                'client_id' => $client->id,
-                'gateway_id' => $payment['gateway']->id ?? null,
-                'external_id' => $payment['external_id'] ?? null,
-                'status' => $payment['success'] ? 'paid' : 'failed',
-                'amount' => $amount,
-                'card_last_digits' => substr($dto->cardNumber, -4),
-            ]);
-
-            foreach ($dto->products as $item) {
-                $transaction->products()->attach(
-                    $item['id'],
-                    ['quantity' => $item['quantity']],
-                );
-            }
+            $transaction = $this->purchaseTransactionRecorder->record(
+                client: $client,
+                gateway: $payment['gateway'] ?? null,
+                externalId: $payment['external_id'] ?? null,
+                amount: $calculatedPurchase->amount,
+                cardNumber: $dto->cardNumber,
+                paid: (bool) $payment['success'],
+                products: $calculatedPurchase->products,
+            );
 
             if (!$payment['success']) {
                 return [
