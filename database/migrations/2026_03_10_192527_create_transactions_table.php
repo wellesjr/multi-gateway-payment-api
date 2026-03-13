@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('client_id')->constrained()->cascadeOnDelete();
             $table->foreignId('gateway_id')->nullable()->constrained()->nullOnDelete();
 
-            $table->string('external_id')->nullable();
+            $table->string('external_id')->nullable()->index();
 
             $table->enum('status', [
                 'pending',
@@ -25,9 +25,9 @@ return new class extends Migration
                 'refunded',
             ])->default('pending');
 
-            $table->integer('amount');
+            $table->decimal('amount', 10, 2);
 
-            $table->string('card_last_numbers', 4)->nullable();
+            $table->string('card_last_digits', 4)->nullable();
 
             $table->timestamps();
         });
