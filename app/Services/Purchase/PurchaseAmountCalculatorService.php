@@ -3,20 +3,18 @@
 namespace App\Services\Purchase;
 
 use App\Dtos\Purchase\CalculatedPurchaseDto;
-use App\Models\Product;
+use App\Repositories\Interfaces\ProductRepositoryInterface;
 
 class PurchaseAmountCalculatorService
 {
-    /**
-     * @param array<int, array{id: int, quantity: int}> $products
-     *
-     * @throws \DomainException
-     */
+    public function __construct(
+        private readonly ProductRepositoryInterface $productRepository,
+    ) {}
+
     public function calculate(array $products): CalculatedPurchaseDto
     {
-        $availableProducts = Product::query()
-            ->whereIn('id', collect($products)->pluck('id'))
-            ->get()
+        $availableProducts = $this->productRepository
+            ->findManyByIds(collect($products)->pluck('id')->map(fn ($id): int => (int) $id)->all())
             ->keyBy('id');
 
         $amount = 0.0;

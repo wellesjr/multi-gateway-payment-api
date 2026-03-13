@@ -3,29 +3,27 @@
 namespace App\Services;
 
 use App\Models\Gateway;
+use App\Repositories\Interfaces\GatewayRepositoryInterface;
 use Illuminate\Support\Collection;
 
 class GatewayService
 {
-    /**
-     * @return Collection<int, Gateway>
-     */
+    public function __construct(
+        private readonly GatewayRepositoryInterface $gatewayRepository,
+    ) {}
+
     public function listAll(): Collection
     {
-        return Gateway::query()->orderBy('priority')->get();
+        return $this->gatewayRepository->allOrderedByPriority();
     }
 
     public function updateStatus(Gateway $gateway, bool $isActive): Gateway
     {
-        $gateway->update(['is_active' => $isActive]);
-
-        return $gateway->fresh();
+        return $this->gatewayRepository->update($gateway, ['is_active' => $isActive]);
     }
 
     public function updatePriority(Gateway $gateway, int $priority): Gateway
     {
-        $gateway->update(['priority' => $priority]);
-
-        return $gateway->fresh();
+        return $this->gatewayRepository->update($gateway, ['priority' => $priority]);
     }
 }

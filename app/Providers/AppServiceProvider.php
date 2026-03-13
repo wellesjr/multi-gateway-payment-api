@@ -3,12 +3,16 @@
 namespace App\Providers;
 
 use App\Repositories\UserRepository;
+use App\Repositories\GatewayRepository;
 use App\Repositories\ClientRepository;
 use App\Repositories\ProductRepository;
+use App\Repositories\TransactionRepository;
 use App\Services\Payment\PaymentGatewayClientResolver;
 use App\Repositories\Interfaces\UserRepositoryInterface;
+use App\Repositories\Interfaces\GatewayRepositoryInterface;
 use App\Repositories\Interfaces\ClientRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
+use App\Repositories\Interfaces\TransactionRepositoryInterface;
 
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -22,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(ClientRepositoryInterface::class, ClientRepository::class);
         $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
+        $this->app->bind(GatewayRepositoryInterface::class, GatewayRepository::class);
+        $this->app->bind(TransactionRepositoryInterface::class, TransactionRepository::class);
 
         $gatewayClients = config('payment.gateway_clients', []);
 

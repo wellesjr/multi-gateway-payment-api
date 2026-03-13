@@ -4,8 +4,8 @@ namespace App\Repositories;
 
 use App\Models\Product;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
-
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class ProductRepository implements ProductRepositoryInterface
 {
@@ -16,6 +16,13 @@ class ProductRepository implements ProductRepositoryInterface
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
         return $this->model->newQuery()->paginate($perPage);
+    }
+
+    public function findManyByIds(array $ids): Collection
+    {
+        return $this->model->newQuery()
+            ->whereIn('id', $ids)
+            ->get();
     }
 
     public function create(array $data): Product

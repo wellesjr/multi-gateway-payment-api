@@ -5,22 +5,18 @@ namespace App\Services\Payment;
 use App\Models\Gateway;
 use App\Models\Transaction;
 use App\Dtos\Payment\ChargePayloadDto;
+use App\Repositories\Interfaces\GatewayRepositoryInterface;
 
 class PaymentOrchestratorService
 {
     public function __construct(
         private readonly PaymentGatewayClientResolver $gatewayClientResolver,
+        private readonly GatewayRepositoryInterface $gatewayRepository,
     ) {}
 
-    /**
-     * @return array{success: bool, gateway: ?Gateway, external_id: ?string, errors: array<int, string>}
-     */
     public function charge(ChargePayloadDto $payload): array
     {
-        $gateways = Gateway::query()
-            ->where('is_active', true)
-            ->orderBy('priority')
-            ->get();
+        $gateways = $this->gatewayRepository->activeOrderedByPriority();
 
         if ($gateways->isEmpty()) {
             return [
