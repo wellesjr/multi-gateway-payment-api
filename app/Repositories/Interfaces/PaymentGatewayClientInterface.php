@@ -9,6 +9,8 @@ use App\Dtos\Payment\GatewayChargeResultDto;
 
 interface PaymentGatewayClientInterface
 {
+    public function gatewayName(): string;
+
     public function charge(ChargePayloadDto $payload): GatewayChargeResultDto;
 
     public function refund(string $externalId): bool;

@@ -14,6 +14,11 @@ class Gateway2Client implements PaymentGatewayClientInterface
         private readonly HttpFactory $http,
     ) {}
 
+    public function gatewayName(): string
+    {
+        return 'gateway2';
+    }
+
     public function charge(ChargePayloadDto $payload): GatewayChargeResultDto
     {
         $response = $this->client()->post(rtrim((string) config('services.gateway2.url'), '/') . '/transacoes', [

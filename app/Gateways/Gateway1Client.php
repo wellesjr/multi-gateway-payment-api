@@ -14,6 +14,11 @@ class Gateway1Client implements PaymentGatewayClientInterface
         private readonly HttpFactory $http,
     ) {}
 
+    public function gatewayName(): string
+    {
+        return 'gateway1';
+    }
+
     public function charge(ChargePayloadDto $payload): GatewayChargeResultDto
     {
         $token = $this->authenticate();

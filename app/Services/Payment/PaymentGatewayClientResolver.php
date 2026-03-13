@@ -2,18 +2,39 @@
 
 namespace App\Services\Payment;
 
-use App\Gateways\Gateway1Client;
-use App\Gateways\Gateway2Client;
 use App\Repositories\Interfaces\PaymentGatewayClientInterface;
 
 class PaymentGatewayClientResolver
 {
+    /**
+     * @var array<string, PaymentGatewayClientInterface>
+     */
+    private array $clientsByGateway = [];
+
+    /**
+     * @param iterable<int, PaymentGatewayClientInterface> $clients
+     */
+    public function __construct(iterable $clients)
+    {
+        foreach ($clients as $client) {
+            $gatewayName = strtolower($client->gatewayName());
+
+            if (isset($this->clientsByGateway[$gatewayName])) {
+                throw new \LogicException('Cliente de gateway duplicado registrado para: ' . $gatewayName);
+            }
+
+            $this->clientsByGateway[$gatewayName] = $client;
+        }
+    }
+
     public function resolve(string $gatewayName): PaymentGatewayClientInterface
     {
-        return match (strtolower($gatewayName)) {
-            'gateway1' => app(Gateway1Client::class),
-            'gateway2' => app(Gateway2Client::class),
-            default => throw new \DomainException('Gateway não suportado: ' . $gatewayName),
-        };
+        $normalizedGatewayName = strtolower($gatewayName);
+
+        if (!isset($this->clientsByGateway[$normalizedGatewayName])) {
+            throw new \DomainException('Gateway não suportado: ' . $gatewayName);
+        }
+
+        return $this->clientsByGateway[$normalizedGatewayName];
     }
 }
