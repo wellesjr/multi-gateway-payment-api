@@ -31,9 +31,18 @@ class TransactionController extends Controller
 
     public function show(Transaction $transaction): JsonResponse
     {
+        $loadedTransaction = $this->transactionService->findById($transaction->id);
+
+        if (!$loadedTransaction) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transação não encontrada.',
+            ], 404);
+        }
+
         return response()->json([
             'success' => true,
-            'data' => new TransactionResource($transaction->load(['client', 'gateway', 'products'])),
+            'data' => new TransactionResource($loadedTransaction),
         ]);
     }
 

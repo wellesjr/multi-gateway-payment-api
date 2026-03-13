@@ -35,4 +35,9 @@ class ClientService
     {
         return $this->clientRepository->findById($id);
     }
+
+    public function findWithTransactions(int $id): ?Client
+    {
+        return $this->clientRepository->findByIdWithRelations($id, ['transactions']);
+    }
 }

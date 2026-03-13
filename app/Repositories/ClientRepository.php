@@ -31,4 +31,9 @@ class ClientRepository implements ClientRepositoryInterface
     {
         return $this->model->newQuery()->find($id);
     }
+
+    public function findByIdWithRelations(int $id, array $relations = []): ?Client
+    {
+        return $this->model->newQuery()->with($relations)->find($id);
+    }
 }

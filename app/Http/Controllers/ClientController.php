@@ -29,7 +29,7 @@ class ClientController extends Controller
 
     public function show(int $id)
     {
-        $client = $this->clientService->find($id);
+        $client = $this->clientService->findWithTransactions($id);
 
         if (!$client) {
             return response()->json([
@@ -37,8 +37,6 @@ class ClientController extends Controller
                 'message' => 'Cliente não encontrado.',
             ], 404);
         }
-
-        $client->load('transactions');
 
         return response()->json([
             'success' => true,

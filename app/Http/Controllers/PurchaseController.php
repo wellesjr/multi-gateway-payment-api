@@ -29,7 +29,7 @@ class PurchaseController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $result['message'],
-                'data' => new TransactionResource($result['transaction']->loadMissing(['client', 'gateway', 'products'])),
+                'data' => new TransactionResource($result['transaction']),
             ], 422);
         }
 

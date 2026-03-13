@@ -14,4 +14,6 @@ interface ClientRepositoryInterface
     public function paginate(int $perPage = 15): LengthAwarePaginator;
 
     public function findById(int $id): ?Client;
+
+    public function findByIdWithRelations(int $id, array $relations = []): ?Client;
 }
