@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\TransactionStatus;
 use App\Models\Transaction;
 use App\Repositories\Interfaces\TransactionRepositoryInterface;
 use App\Services\Payment\PaymentOrchestratorService;
@@ -32,7 +33,7 @@ class TransactionService
             throw new \DomainException('Transação não encontrada.');
         }
 
-        if ($transactionWithGateway->status !== 'paid') {
+        if ($transactionWithGateway->status !== TransactionStatus::Paid) {
             throw new \DomainException('Somente transações pagas podem ser reembolsadas.');
         }
 
@@ -42,7 +43,9 @@ class TransactionService
             throw new \DomainException('O gateway não autorizou o reembolso.');
         }
 
-        $updatedTransaction = $this->transactionRepository->update($transactionWithGateway, ['status' => 'refunded']);
+        $updatedTransaction = $this->transactionRepository->update($transactionWithGateway, [
+            'status' => TransactionStatus::Refunded->value,
+        ]);
 
         return $this->transactionRepository->findWithRelations($updatedTransaction->id, ['client', 'gateway', 'products', 'paymentAttempts.gateway'])
             ?? $updatedTransaction;

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Dtos\Purchase\PurchaseDto;
+use App\Dtos\Purchase\PurchaseResultDto;
 use App\UseCases\Purchase\FinalizePurchaseUseCase;
 use App\UseCases\Purchase\ResolvePurchasePaymentUseCase;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,7 @@ class PurchaseService
         private readonly FinalizePurchaseUseCase $finalizePurchaseUseCase,
     ) {}
 
-    public function purchase(PurchaseDto $dto): array
+    public function purchase(PurchaseDto $dto): PurchaseResultDto
     {
         return DB::transaction(function () use ($dto) {
             $client = $this->clientService->findOrCreate(
@@ -28,8 +29,8 @@ class PurchaseService
             return $this->finalizePurchaseUseCase->execute(
                 client: $client,
                 dto: $dto,
-                calculatedPurchase: $resolvedPayment['calculatedPurchase'],
-                payment: $resolvedPayment['payment'],
+                calculatedPurchase: $resolvedPayment->calculatedPurchase,
+                payment: $resolvedPayment->payment,
             );
         });
     }

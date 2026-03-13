@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TransactionStatus;
 use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
@@ -19,6 +20,7 @@ class Transaction extends Model
     {
         return [
             'amount' => 'decimal:2',
+            'status' => TransactionStatus::class,
         ];
     }
 

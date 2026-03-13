@@ -22,7 +22,7 @@ class UpdateUserRequest extends FormRequest
             return false;
         }
 
-        return Gate::forUser($authUser)->allows('users.update', $targetUser);
+        return Gate::forUser($authUser)->allows('users.update-target', $targetUser);
     }
 
     public function rules(): array

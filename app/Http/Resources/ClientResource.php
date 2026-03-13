@@ -15,7 +15,7 @@ class ClientResource extends JsonResource
             'transactions' => $this->whenLoaded('transactions', function () {
                 return $this->transactions->map(fn($transaction) => [
                     'id' => $transaction->id,
-                    'status' => $transaction->status,
+                    'status' => $transaction->status?->value ?? $transaction->status,
                     'amount' => $transaction->amount,
                     'external_id' => $transaction->external_id,
                     'created_at' => $transaction->created_at,

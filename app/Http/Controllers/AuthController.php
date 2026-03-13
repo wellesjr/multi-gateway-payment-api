@@ -27,8 +27,8 @@ class AuthController extends Controller
         return ApiResponse::success(
             message: 'Login realizado com sucesso',
             extra: [
-                'user' => $result['user'],
-                'token' => $result['token'],
+                'user' => $result->user,
+                'token' => $result->token,
             ],
         );
     }

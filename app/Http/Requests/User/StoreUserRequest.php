@@ -20,7 +20,7 @@ class StoreUserRequest extends FormRequest
             return false;
         }
 
-        return Gate::forUser($user)->allows('users.create');
+        return Gate::forUser($user)->allows('users.manage');
     }
 
     public function rules(): array

@@ -2,8 +2,11 @@
 
 namespace App\Services\Payment;
 
-use App\Models\Transaction;
 use App\Dtos\Payment\ChargePayloadDto;
+use App\Dtos\Payment\PaymentAttemptDto;
+use App\Dtos\Payment\PaymentChargeResultDto;
+use App\Enums\PaymentAttemptStatus;
+use App\Models\Transaction;
 use App\Repositories\Interfaces\GatewayRepositoryInterface;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Log;
@@ -15,20 +18,17 @@ class PaymentOrchestratorService
         private readonly GatewayRepositoryInterface $gatewayRepository,
     ) {}
 
-    public function charge(ChargePayloadDto $payload): array
+    public function charge(ChargePayloadDto $payload): PaymentChargeResultDto
     {
         $gateways = $this->gatewayRepository->activeOrderedByPriority();
 
         if ($gateways->isEmpty()) {
             Log::warning('payment.gateway.none_active');
 
-            return [
-                'success' => false,
-                'gateway' => null,
-                'external_id' => null,
-                'errors' => ['Nenhum gateway ativo encontrado.'],
-                'attempts' => [],
-            ];
+            return PaymentChargeResultDto::failed(
+                errors: ['Nenhum gateway ativo encontrado.'],
+                attempts: [],
+            );
         }
 
         $errors = [];
@@ -49,35 +49,33 @@ class PaymentOrchestratorService
                 ]);
 
                 $errors[] = $errorMessage;
-                $attempts[] = [
-                    'gateway_id' => $gateway->id,
-                    'gateway_name' => $gateway->name,
-                    'status' => 'exception',
-                    'external_id' => null,
-                    'error_message' => $exception->getMessage(),
-                    'attempted_at' => now(),
-                ];
+                $attempts[] = new PaymentAttemptDto(
+                    gatewayId: $gateway->id,
+                    gatewayName: $gateway->name,
+                    status: PaymentAttemptStatus::Exception,
+                    externalId: null,
+                    errorMessage: $exception->getMessage(),
+                    attemptedAt: now(),
+                );
 
                 continue;
             }
 
             if ($result->success) {
-                $attempts[] = [
-                    'gateway_id' => $gateway->id,
-                    'gateway_name' => $gateway->name,
-                    'status' => 'success',
-                    'external_id' => $result->externalId,
-                    'error_message' => null,
-                    'attempted_at' => now(),
-                ];
+                $attempts[] = new PaymentAttemptDto(
+                    gatewayId: $gateway->id,
+                    gatewayName: $gateway->name,
+                    status: PaymentAttemptStatus::Success,
+                    externalId: $result->externalId,
+                    errorMessage: null,
+                    attemptedAt: now(),
+                );
 
-                return [
-                    'success' => true,
-                    'gateway' => $gateway,
-                    'external_id' => $result->externalId,
-                    'errors' => [],
-                    'attempts' => $attempts,
-                ];
+                return PaymentChargeResultDto::success(
+                    gateway: $gateway,
+                    externalId: $result->externalId,
+                    attempts: $attempts,
+                );
             }
 
             $errorMessage = $result->error ?? "Falha ao processar no gateway {$gateway->name}.";
@@ -89,14 +87,14 @@ class PaymentOrchestratorService
             ]);
 
             $errors[] = $errorMessage;
-            $attempts[] = [
-                'gateway_id' => $gateway->id,
-                'gateway_name' => $gateway->name,
-                'status' => 'failed',
-                'external_id' => null,
-                'error_message' => $errorMessage,
-                'attempted_at' => now(),
-            ];
+            $attempts[] = new PaymentAttemptDto(
+                gatewayId: $gateway->id,
+                gatewayName: $gateway->name,
+                status: PaymentAttemptStatus::Failed,
+                externalId: null,
+                errorMessage: $errorMessage,
+                attemptedAt: now(),
+            );
         }
 
         Log::warning('payment.gateway.charge.all_failed', [
@@ -104,13 +102,10 @@ class PaymentOrchestratorService
             'errors' => $errors,
         ]);
 
-        return [
-            'success' => false,
-            'gateway' => null,
-            'external_id' => null,
-            'errors' => $errors,
-            'attempts' => $attempts,
-        ];
+        return PaymentChargeResultDto::failed(
+            errors: $errors,
+            attempts: $attempts,
+        );
     }
 
     public function refund(Transaction $transaction): bool

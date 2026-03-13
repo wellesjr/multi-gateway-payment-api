@@ -23,17 +23,17 @@ class PurchaseController extends Controller
             return ApiResponse::error($e->getMessage(), 422);
         }
 
-        if (!$result['success']) {
+        if (!$result->success) {
             return ApiResponse::error(
-                message: $result['message'],
+                message: $result->message,
                 status: 422,
-                data: new TransactionResource($result['transaction']),
+                data: new TransactionResource($result->transaction),
             );
         }
 
         return ApiResponse::success(
-            message: $result['message'],
-            data: new TransactionResource($result['transaction']),
+            message: $result->message,
+            data: new TransactionResource($result->transaction),
             status: 201,
         );
     }

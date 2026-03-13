@@ -2,6 +2,8 @@
 
 namespace App\Services\Purchase;
 
+use App\Dtos\Payment\PaymentAttemptDto;
+use App\Enums\TransactionStatus;
 use App\Models\Client;
 use App\Models\Gateway;
 use App\Models\Transaction;
@@ -29,7 +31,7 @@ class PurchaseTransactionRecorderService
             'client_id' => $client->id,
             'gateway_id' => $gateway?->id,
             'external_id' => $externalId,
-            'status' => $paid ? 'paid' : 'failed',
+            'status' => $paid ? TransactionStatus::Paid->value : TransactionStatus::Failed->value,
             'amount' => $amount,
             'card_last_digits' => substr($cardNumber, -4),
         ]);

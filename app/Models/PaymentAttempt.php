@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentAttemptStatus;
 use Illuminate\Database\Eloquent\Model;
 
 class PaymentAttempt extends Model
@@ -18,6 +19,7 @@ class PaymentAttempt extends Model
     protected function casts(): array
     {
         return [
+            'status' => PaymentAttemptStatus::class,
             'attempted_at' => 'datetime',
         ];
     }

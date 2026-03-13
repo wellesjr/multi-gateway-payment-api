@@ -2,8 +2,10 @@
 
 namespace App\UseCases\Purchase;
 
+use App\Dtos\Payment\PaymentChargeResultDto;
 use App\Dtos\Purchase\CalculatedPurchaseDto;
 use App\Dtos\Purchase\PurchaseDto;
+use App\Dtos\Purchase\PurchaseResultDto;
 use App\Models\Client;
 use App\Repositories\Interfaces\TransactionRepositoryInterface;
 use App\Services\Purchase\PurchaseTransactionRecorderService;
@@ -19,17 +21,17 @@ class FinalizePurchaseUseCase
         Client $client,
         PurchaseDto $dto,
         CalculatedPurchaseDto $calculatedPurchase,
-        array $payment,
-    ): array {
+        PaymentChargeResultDto $payment,
+    ): PurchaseResultDto {
         $transaction = $this->purchaseTransactionRecorder->record(
             client: $client,
-            gateway: $payment['gateway'] ?? null,
-            externalId: $payment['external_id'] ?? null,
+            gateway: $payment->gateway,
+            externalId: $payment->externalId,
             amount: $calculatedPurchase->amount,
             cardNumber: $dto->cardNumber,
-            paid: (bool) $payment['success'],
+            paid: $payment->success,
             products: $calculatedPurchase->products,
-            attempts: $payment['attempts'] ?? [],
+            attempts: $payment->attempts,
         );
 
         $transactionWithRelations = $this->transactionRepository->findWithRelations(
@@ -37,18 +39,18 @@ class FinalizePurchaseUseCase
             ['client', 'gateway', 'products', 'paymentAttempts.gateway'],
         ) ?? $transaction;
 
-        if (!$payment['success']) {
-            return [
-                'success' => false,
-                'transaction' => $transactionWithRelations,
-                'message' => 'Não foi possível processar a compra em nenhum gateway.',
-            ];
+        if (!$payment->success) {
+            return new PurchaseResultDto(
+                success: false,
+                transaction: $transactionWithRelations,
+                message: 'Não foi possível processar a compra em nenhum gateway.',
+            );
         }
 
-        return [
-            'success' => true,
-            'transaction' => $transactionWithRelations,
-            'message' => 'Compra realizada com sucesso.',
-        ];
+        return new PurchaseResultDto(
+            success: true,
+            transaction: $transactionWithRelations,
+            message: 'Compra realizada com sucesso.',
+        );
     }
 }

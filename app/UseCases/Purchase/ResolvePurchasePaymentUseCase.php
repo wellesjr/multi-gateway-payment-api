@@ -4,6 +4,7 @@ namespace App\UseCases\Purchase;
 
 use App\Dtos\Payment\ChargePayloadDto;
 use App\Dtos\Purchase\PurchaseDto;
+use App\Dtos\Purchase\ResolvedPurchasePaymentDto;
 use App\Models\Client;
 use App\Services\Payment\PaymentOrchestratorService;
 use App\Services\Purchase\PurchaseAmountCalculatorService;
@@ -15,7 +16,7 @@ class ResolvePurchasePaymentUseCase
         private readonly PaymentOrchestratorService $paymentOrchestrator,
     ) {}
 
-    public function execute(PurchaseDto $dto, Client $client): array
+    public function execute(PurchaseDto $dto, Client $client): ResolvedPurchasePaymentDto
     {
         $calculatedPurchase = $this->purchaseAmountCalculator->calculate($dto->products);
 
@@ -27,9 +28,9 @@ class ResolvePurchasePaymentUseCase
             cvv: $dto->cvv,
         ));
 
-        return [
-            'calculatedPurchase' => $calculatedPurchase,
-            'payment' => $payment,
-        ];
+        return new ResolvedPurchasePaymentDto(
+            calculatedPurchase: $calculatedPurchase,
+            payment: $payment,
+        );
     }
 }

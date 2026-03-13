@@ -11,7 +11,7 @@ class TransactionResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'status' => $this->status,
+            'status' => $this->status?->value ?? $this->status,
             'amount' => $this->amount,
             'external_id' => $this->external_id,
             'card_last_digits' => $this->card_last_digits,
@@ -47,7 +47,7 @@ class TransactionResource extends JsonResource
                 return $this->paymentAttempts->map(function ($attempt) {
                     return [
                         'id' => $attempt->id,
-                        'status' => $attempt->status,
+                        'status' => $attempt->status?->value ?? $attempt->status,
                         'external_id' => $attempt->external_id,
                         'error_message' => $attempt->error_message,
                         'attempted_at' => $attempt->attempted_at,

@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Dtos\Payment\PaymentAttemptDto;
 use App\Models\PaymentAttempt;
 use App\Models\Transaction;
 use App\Repositories\Interfaces\PaymentAttemptRepositoryInterface;
@@ -17,11 +18,11 @@ class PaymentAttemptRepository implements PaymentAttemptRepositoryInterface
         foreach ($attempts as $attempt) {
             $this->model->newQuery()->create([
                 'transaction_id' => $transaction->id,
-                'gateway_id' => $attempt['gateway_id'],
-                'status' => $attempt['status'],
-                'external_id' => $attempt['external_id'],
-                'error_message' => $attempt['error_message'],
-                'attempted_at' => $attempt['attempted_at'] ?? now(),
+                'gateway_id' => $attempt->gatewayId,
+                'status' => $attempt->status->value,
+                'external_id' => $attempt->externalId,
+                'error_message' => $attempt->errorMessage,
+                'attempted_at' => $attempt->attemptedAt,
             ]);
         }
     }

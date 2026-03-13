@@ -2,6 +2,9 @@
 
 namespace Tests\Unit\Purchase;
 
+use App\Dtos\Payment\PaymentAttemptDto;
+use App\Enums\PaymentAttemptStatus;
+use App\Enums\TransactionStatus;
 use App\Models\Client;
 use App\Models\Gateway;
 use App\Models\Product;
@@ -32,17 +35,18 @@ class PurchaseTransactionRecorderServiceTest extends TestCase
                 ['id' => $product->id, 'quantity' => 2],
             ],
             attempts: [
-                [
-                    'gateway_id' => $gateway->id,
-                    'status' => 'success',
-                    'external_id' => 'ext-123',
-                    'error_message' => null,
-                    'attempted_at' => now(),
-                ],
+                new PaymentAttemptDto(
+                    gatewayId: $gateway->id,
+                    gatewayName: $gateway->name,
+                    status: PaymentAttemptStatus::Success,
+                    externalId: 'ext-123',
+                    errorMessage: null,
+                    attemptedAt: now(),
+                ),
             ],
         );
 
-        $this->assertSame('paid', $transaction->status);
+        $this->assertSame(TransactionStatus::Paid, $transaction->status);
 
         $this->assertDatabaseHas('transactions', [
             'id' => $transaction->id,
@@ -86,7 +90,7 @@ class PurchaseTransactionRecorderServiceTest extends TestCase
             ],
         );
 
-        $this->assertSame('failed', $transaction->status);
+        $this->assertSame(TransactionStatus::Failed, $transaction->status);
 
         $this->assertDatabaseHas('transactions', [
             'id' => $transaction->id,
