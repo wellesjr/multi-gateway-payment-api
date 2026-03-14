@@ -1,59 +1,137 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Multi Gateway Payment API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API de pagamentos que orquestra múltiplos gateways (com fallback por prioridade), suporta idempotência para compra e reembolso e executa reconciliação financeira (job) após cada operação.
 
-## About Laravel
+## Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Laravel 12 + PHP 8.2+ (Docker usa `php:8.4-cli`)
+- MySQL 8
+- Auth via Laravel Sanctum (Bearer token)
+- Gateways mock (container `matheusprotzen/gateways-mock`)
+- Testes: Pest/PHPUnit
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requisitos
+- Docker + Docker Compose
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Configuração do ambiente
 
-## Learning Laravel
+O projeto possui um arquivo de exemplo em `.env.example`.<br>
+Copie e cole o arquivo `.env.example` e renomei o arquivo copiado para `.env`<br>
+ou use um dos comandos abaixo.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- PowerShell (Windows):
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+    ```powershell
+    Copy-Item .env.example .env
+    ```
 
-## Laravel Sponsors
+- Git Bash / Linux / WSL:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+    ```bash
+    cp .env.example .env
+    ```
 
-### Premium Partners
+Variáveis importantes (já presentes no `.env.example`):
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- `DB_*` (MySQL)
+- `GATEWAY1_*` e `GATEWAY2_*` (integração com o mock)
+- `SANCTUM_TOKEN_EXPIRATION` (minutos)
 
-## Contributing
+## Como executar
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. Após o `.env` criado conforme a seção acima.
+2. Suba os containers:
 
-## Code of Conduct
+    ```bash
+    docker compose up -d --build
+    ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+O Compose executa automaticamente `composer install`, `php artisan migrate --force` e inicia a API em `http://localhost:8000`.
 
-## Security Vulnerabilities
+Para ver logs:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+docker compose logs -f app
+```
 
-## License
+Para confirmar rapidamente que as dependências foram instaladas dentro do container:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+docker compose exec app sh -lc "test -f vendor/autoload.php && echo OK"
+```
+
+Para parar:
+
+```bash
+docker compose down
+```
+
+## Autenticação
+
+- `POST /api/login` retorna um token Sanctum.
+- Para acessar as rotas de `/api/v1/*`, envie `Authorization: Bearer <TOKEN>`.
+
+Observação: a expiração do token é controlada por `SANCTUM_TOKEN_EXPIRATION` (padrão: 5 minutos).
+
+### Usuário admin padrão
+
+Durante as migrations existe uma inserção automática de um usuário ADMIN:
+
+- email: `admin_master@gmail.com`
+- senha: `12345678`
+
+## Papéis e permissões
+
+Roles disponíveis: `ADMIN`, `MANAGER`, `FINANCE`, `USER`.
+
+Permissões (resumo conforme gates em `AuthorizationServiceProvider`):
+
+- Users: `ADMIN` e `MANAGER` (com restrições para `MANAGER` editar/excluir `ADMIN`)
+- Products: `ADMIN`, `MANAGER`, `FINANCE`
+- Clients: apenas `ADMIN`
+- Gateways: apenas `ADMIN`
+- Transactions (listar/ver): apenas `ADMIN`
+- Refund: `ADMIN` e `FINANCE`
+
+## Endpoints
+
+Documentação detalhada (payloads e exemplos):
+
+- [Documentação da API](https://documenter.getpostman.com/view/18453345/2sBXigMDbY)
+
+Endpoints principais:
+
+- `POST /api/login`
+- `POST /api/purchase` (não requer autenticação)
+- `GET /api/v1/transactions` (auth)
+- `POST /api/v1/transactions/{id}/refund` (auth)
+
+## Idempotência
+
+Algumas operações aceitam o header `Idempotency-Key`.
+
+- Compra (`POST /api/purchase`):
+    - mesma chave + mesmo payload: retorna transação já processada (HTTP 200)
+    - mesma chave + payload diferente: erro (HTTP 422)
+- Reembolso (`POST /api/v1/transactions/{id}/refund`):
+    - mesma chave + mesma transação: retorna o resultado já processado
+    - mesma chave + outra transação: erro (HTTP 422)
+
+## Rate limiting
+
+- `login`: 5 req/min por IP
+- `api`: 480 req/min por usuário (ou IP)
+
+## Testes
+
+- Local:
+
+    ```bash
+    composer test
+    ```
+
+- Com Docker:
+
+    ```bash
+    docker compose exec app php artisan test
+    ```
