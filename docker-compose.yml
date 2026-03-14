@@ -15,10 +15,17 @@ services:
       gateway:
         condition: service_started
     command: >
-      sh -c "[ -d vendor ] || composer install --no-interaction --prefer-dist --no-progress &&
-             php artisan migrate --force &&
-             php artisan serve --host=0.0.0.0 --port=8000"
-
+      sh -lc "
+        set -e;
+        cd /var/www/html;
+        if [ ! -f vendor/autoload.php ] || { [ -f composer.lock ] && [ composer.lock -nt vendor/autoload.php ]; }; then
+          echo '[docker] Instalando dependências (composer install)...';
+          export COMPOSER_ALLOW_SUPERUSER=1;
+          composer install --no-interaction --prefer-dist --no-progress;
+        fi;
+        php artisan migrate --force;
+        php artisan serve --host=0.0.0.0 --port=8000;
+      "
   db:
     image: mysql:8.0
     container_name: payment_db
