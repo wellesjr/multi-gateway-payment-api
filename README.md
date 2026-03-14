@@ -48,17 +48,17 @@ Variáveis importantes (já presentes no `.env.example`):
 
 O Compose executa automaticamente `composer install`, `php artisan migrate --force` e inicia a API em `http://localhost:8000`.
 
-Para ver logs:
+Para ver logs e acompanhar a instalção das dependencias:
 
 ```bash
 docker compose logs -f app
 ```
+Assim que aparecer a linha <br>
+`payment_app  |    INFO  Server running on [http://0.0.0.0:8000].`
 
-Para confirmar rapidamente que as dependências foram instaladas dentro do container:
+A estará disponivel no http://localhost:8000
 
-```bash
-docker compose exec app sh -lc "test -f vendor/autoload.php && echo OK"
-```
+Acesse a [Documentação](#documentacao-api) da api para baixar a collection.
 
 Para parar:
 
@@ -95,7 +95,7 @@ Permissões (resumo conforme gates em `AuthorizationServiceProvider`):
 
 ## Endpoints
 
-Documentação detalhada (payloads e exemplos):
+<a name="documentacao-api">Documentação detalhada </a>(payloads e exemplos):
 
 - [Documentação da API](https://documenter.getpostman.com/view/18453345/2sBXigMDbY)
 
